@@ -18,6 +18,11 @@
 
 import Foundation
 
+class Model : RLMObject {
+    var foo : Int = 0
+    dynamic var bar : Int = 0
+}
+
 @objc public class RLMSwiftSupport {
 
     public class func isSwiftClassName(className: NSString) -> Bool {
@@ -29,6 +34,27 @@ import Foundation
     }
 
     public class func schemaForObjectClass(aClass: AnyClass) -> RLMObjectSchema {
+        let obj = Model()
+        dump(obj)
+        let ref = reflect(obj)
+        for i in 0..<ref.count {
+            NSLog("\(ref[i].0) \(ref[i].1.objectIdentifier) \(ref[i].1.count)")
+        }
+
+        var propertiesCount : CUnsignedInt = 0
+        let propertiesInAClass : UnsafeMutablePointer<objc_property_t> = class_copyPropertyList(obj.dynamicType, &propertiesCount)
+        for var i = 0; i < Int(propertiesCount); i++ {
+            NSLog("\(NSString(CString: property_getAttributes(propertiesInAClass[i]), encoding: NSUTF8StringEncoding))")
+
+            var attrCount : CUnsignedInt = 0
+            let attrs = property_copyAttributeList(propertiesInAClass[i], &attrCount)
+
+            for var j = 0; j < Int(attrCount); ++j {
+                NSLog("\(NSString(CString: attrs[j].value, encoding: NSUTF8StringEncoding))")
+            }
+        }
+
+
         let className = demangleClassName(NSStringFromClass(aClass))
 
         let swiftObject = (aClass as RLMObject.Type)()
@@ -37,6 +63,11 @@ import Foundation
 
         var properties = [RLMProperty]()
 
+        dump(swiftObject)
+//        for var index=0; index<reflect(swiftObject).count; ++index {
+//            println(reflect(swiftObject)[index].0 + ": "+reflect(swiftObject)[index].1.summary)
+//        }
+
         // Skip the first property (super):
         // super is an implicit property on Swift objects
         for i in 1..<reflection.count {
@@ -44,6 +75,8 @@ import Foundation
             if ignoredPropertiesForClass?.containsObject(propertyName) ?? false {
                 continue
             }
+
+            NSLog("\(reflection[i].0) \(reflection[i].1)")
 
             properties.append(createPropertyForClass(aClass,
                 mirror: reflection[i].1,
