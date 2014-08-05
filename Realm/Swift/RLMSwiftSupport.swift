@@ -23,8 +23,28 @@ class Model : RLMObject {
     dynamic var bar : Int = 0
 }
 
-@objc public class RLMSwiftSupport {
+class Sample : NSObject {
+    var foo = 0
+    dynamic var bar = 0
+}
 
+class Observer : NSObject {
+    var sample = Sample()
+
+    func test() {
+        sample.addObserver(self, forKeyPath: "bar", options: nil, context: nil)
+        sample.bar = 5
+
+        sample.addObserver(self, forKeyPath: "foo", options: nil, context: nil)
+        sample.foo = 5
+    }
+
+    override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [NSObject : AnyObject]!, context: UnsafeMutablePointer<()>) {
+        NSLog("change: \(change)")
+    }
+}
+
+@objc public class RLMSwiftSupport {
     public class func isSwiftClassName(className: NSString) -> Bool {
         return className.rangeOfString(".").location != NSNotFound
     }
@@ -34,6 +54,11 @@ class Model : RLMObject {
     }
 
     public class func schemaForObjectClass(aClass: AnyClass) -> RLMObjectSchema {
+        var test = Observer()
+        test.test()
+
+
+
         let obj = Model()
         dump(obj)
         let ref = reflect(obj)
