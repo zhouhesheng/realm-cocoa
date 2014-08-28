@@ -18,12 +18,48 @@
 
 #import "RLMTestCase.h"
 #import  <tightdb/data_type.hpp>
+#import  <tightdb/group.hpp>
 #import "RLMUtil.hpp"
+#include <sys/mman.h>
 
 @interface PropertyTypeTests : RLMTestCase
 @end
 
 @implementation PropertyTypeTests
+
+- (void)testStuff {
+    int fd = open(RLMRealm.defaultRealmPath.UTF8String, O_CREAT);
+    size_t lo = 4096, hi = 1 << 31;
+    while (hi - lo > 4096) {
+        size_t size = (hi + lo) / 2;
+        void *b = mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+        munmap(b, size);
+
+        if (b == MAP_FAILED)
+            hi = size;
+        else
+            lo = size;
+    }
+    NSLog(@"%zu %zu", lo, hi);
+
+    tightdb::Group group(RLMRealm.defaultRealmPath.UTF8String, tightdb::Group::mode_ReadWrite);
+    tightdb::TableRef table = group.add_table("table");
+    table->add_column(tightdb::type_Binary, "data");
+
+    char data[5000] = {0};
+
+    NSLog(@"");
+    for (int i = 0; i < 100000; ++i) {
+        if (i % 1000 == 0)
+            NSLog(@"%d", i);
+        table->add_empty_row();
+        table->set_binary(0, i, tightdb::BinaryData(data, sizeof data));
+        if (i % 1000 == 0)
+            group.commit();
+    }
+
+    NSLog(@"");
+}
 
 - (void)testPropertyTypes
 {

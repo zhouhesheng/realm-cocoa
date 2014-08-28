@@ -29,9 +29,37 @@
 @interface RealmTests : RLMTestCase
 @end
 
+@interface DataObject : RLMObject
+@property NSData *data;
+@end
+
+@implementation DataObject
+@end
+
+
 @implementation RealmTests
 
 #pragma mark - Tests
+
+- (void)testStuff {
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    NSData *data = [NSData dataWithBytesNoCopy:calloc(5000, 1) length:5000 freeWhenDone:YES];
+    for (int i = 0; i < 100000; ++i) {
+        if ((i % 1000) == 0) {
+            NSLog(@"%d", i);
+            [realm beginWriteTransaction];
+        }
+        @autoreleasepool {
+            DataObject *obj = [DataObject new];
+            obj.data = [NSData dataWithData:data];
+            [realm addObject:obj];
+        }
+        if ((i % 1000) == 999) {
+            [realm commitWriteTransaction];
+        }
+    }
+    NSLog(@"");
+}
 
 - (void)testCoreDebug {
 #if DEBUG
