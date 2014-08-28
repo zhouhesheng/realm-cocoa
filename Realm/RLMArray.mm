@@ -69,7 +69,12 @@
 }
 
 - (void)addObjectsFromArray:(id)objects {
-    for (id obj in objects) {
+    for (RLMObject *obj in objects) {
+        if (![obj isKindOfClass:[RLMObject class]]) {
+            NSString *msg = [NSString stringWithFormat:@"Cannot insert objects of type %@ with addObjectsFromArray:. Only RLMObjects are supported.",
+                             [obj.class className]];
+            @throw [NSException exceptionWithName:@"RLMException" reason:msg userInfo:nil];
+        }
         [self addObject:obj];
     }
 }

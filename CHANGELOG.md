@@ -1,3 +1,15 @@
+0.85.0 Release notes (YYYY-MM-DD)
+=============================================================
+
+### API breaking changes
+
+### Enhancements
+
+### Bugfixes
+
+* Throw a less cryptic exception when passing an array containing a
+  non-RLMObject to -[RLMRealm addObjectsFromArray:].
+
 0.84.0 Release notes (2014-08-28)
 =============================================================
 

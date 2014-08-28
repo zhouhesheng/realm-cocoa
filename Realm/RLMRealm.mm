@@ -515,6 +515,11 @@ static NSArray *s_objectDescriptors = nil;
 
 - (void)addObjectsFromArray:(id)array {
     for (RLMObject *obj in array) {
+        if (![obj isKindOfClass:[RLMObject class]]) {
+            NSString *msg = [NSString stringWithFormat:@"Cannot insert objects of type %@ with addObjectsFromArray:. Only RLMObjects are supported.",
+                             [obj.class className]];
+            @throw [NSException exceptionWithName:@"RLMException" reason:msg userInfo:nil];
+        }
         [self addObject:obj];
     }
 }

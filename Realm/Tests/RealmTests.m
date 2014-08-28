@@ -420,4 +420,19 @@
     OSSpinLockLock(&spinlock);
 }
 
+- (void)testAddObjectsFromArray
+{
+    RLMRealm *realm = [self realmWithTestPath];
+
+    [realm beginWriteTransaction];
+    XCTAssertThrows(([realm addObjectsFromArray:@[@[@"Rex", @10]]]),
+                    @"should reject non-RLMObject in array");
+
+    DogObject *dog = [DogObject new];
+    dog.dogName = @"Rex";
+    dog.age = 10;
+    XCTAssertNoThrow([realm addObjectsFromArray:@[dog]], @"should allow RLMObject in array");
+    XCTAssertEqual(1U, [[DogObject allObjectsInRealm:realm] count]);
+}
+
 @end
