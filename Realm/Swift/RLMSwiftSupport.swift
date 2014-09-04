@@ -18,6 +18,14 @@
 
 import Foundation
 
+public typealias RealmObject = RLMObject
+public typealias RealmSchema = RLMSchema
+public typealias RealmObjectSchema = RLMObjectSchema
+public typealias RealmMigration = RLMMigration
+public typealias RealmNotificationToken = RLMNotificationToken
+public typealias RealmMigrationBlock = RLMMigrationBlock
+public typealias RealmNotificationBlock = RLMNotificationBlock
+
 @objc public class RLMSwiftSupport {
 
     public class func isSwiftClassName(className: NSString) -> Bool {
@@ -65,11 +73,11 @@ import Foundation
                 case is Bool.Type, is Bool?.Type:
                     return (RLMProperty(name: name, type: .Bool, objectClassName: nil, attributes: attr), "c")
                 case is Int.Type, is Int?.Type:
-#if arch(x86_64) || arch(arm64)
-                    let t = "l"
-#else
-                    let t = "i"
-#endif
+                    #if arch(x86_64) || arch(arm64)
+                        let t = "l"
+                        #else
+                        let t = "i"
+                    #endif
                     return (RLMProperty(name: name, type: .Int, objectClassName: nil, attributes: attr), t)
                 case is Float.Type, is Float?.Type:
                     return (RLMProperty(name: name, type: .Float, objectClassName: nil, attributes: attr), "f")
@@ -93,7 +101,7 @@ import Foundation
                     println("Can't persist property '\(name)' with incompatible type.\nAdd to ignoredPropertyNames: method to ignore.")
                     abort()
                 }
-            }()
+                }()
 
             // create objc property
             let attr = objc_property_attribute_t(name: "T", value: t)

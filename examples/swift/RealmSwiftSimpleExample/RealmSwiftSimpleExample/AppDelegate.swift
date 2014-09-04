@@ -19,12 +19,12 @@
 import UIKit
 import Realm
 
-class Dog: RLMObject {
+class Dog: RealmObject {
     dynamic var name = ""
     dynamic var age = 0
 }
 
-class Person: RLMObject {
+class Person: RealmObject {
     dynamic var name = ""
     dynamic var dogs = RLMArray(objectClassName: Dog.className())
 }
@@ -54,35 +54,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         println("Name of dog: \(mydog.name)")
         
         // Realms are used to group data together
-        let realm = RLMRealm.defaultRealm() // Create realm pointing to default file
+        let realm = Realm.defaultRealm() // Create realm pointing to default file
         
         // Save your object
-        realm.beginWriteTransaction()
-        realm.addObject(mydog)
-        realm.commitWriteTransaction()
+        realm.transactionWithBlock() {
+            realm.addObject(mydog)
+        }
         
         // Query
-        var results = Dog.objectsInRealm(realm, withPredicate: NSPredicate(format: "name contains 'x'"))
+        var results = objects(Dog.self, "name contains 'x'")
 
         // Queries are chainable!
-        var results2 = results.objectsWithPredicate(NSPredicate(format: "age > 8"))
-        println("Number of dogs: \(results.count)")
+        var results2 = results.objectsWhere("age > 8")
+        println("Number of dogs: \(results2.count)")
         
         // Link objects
         var person = Person()
         person.name = "Tim"
         person.dogs.addObject(mydog)
         
-        realm.beginWriteTransaction()
-        realm.addObject(person)
-        realm.commitWriteTransaction()
+        realm.transactionWithBlock() {
+            realm.addObject(person)
+        }
 
         // Thread-safety
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            let otherRealm = RLMRealm.defaultRealm()
-            var otherResults = Dog.objectsInRealm(otherRealm, withPredicate: NSPredicate(format:"name contains 'Rex'"))
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+            var otherResults = objects(Dog.self, "name contains 'Rex'")
             println("Number of dogs \(otherResults.count)")
-        })
+        }
         
         return true
     }

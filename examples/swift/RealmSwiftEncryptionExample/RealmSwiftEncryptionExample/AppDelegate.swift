@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class StringObject: RLMObject {
+class StringObject: RealmObject {
     dynamic var stringProp = ""
 }
 
@@ -38,33 +38,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window!.rootViewController = rootVC
 
         // Realms are used to group data together
-        let realm = RLMRealm.defaultRealm() // Create realm pointing to default file
+        let realm = Realm.defaultRealm() // Create realm pointing to default file
 
         // Encrypt realm file
         var error: NSError?
         let success = NSFileManager.defaultManager().setAttributes([NSFileProtectionKey: NSFileProtectionComplete],
-            ofItemAtPath: RLMRealm.defaultRealm().path, error: &error)
+            ofItemAtPath: Realm.defaultRealmPath(), error: &error)
         if !success {
             println("encryption attribute was not successfully set on realm file")
             println("error: \(error?.localizedDescription)")
         }
         
         // Save your object
-        realm.beginWriteTransaction()
-        let obj = StringObject()
-        obj.stringProp = "abcd"
-        realm.addObject(obj)
-        realm.commitWriteTransaction()
+        realm.transactionWithBlock() {
+            let obj = StringObject()
+            obj.stringProp = "abcd"
+            realm.addObject(obj)
+        }
 
         // Read all string objects from the encrypted realm
-        println("all string objects: \(StringObject.allObjects())")
+        println("all string objects: \(objects(StringObject))")
         
         return true
-    }
-    
-    func deleteRealmFile() {
-        let documentsPaths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
-        var path = documentsPaths.stringByAppendingPathComponent("default.realm")
-        NSFileManager.defaultManager().removeItemAtPath(path, error: nil)
     }
 }

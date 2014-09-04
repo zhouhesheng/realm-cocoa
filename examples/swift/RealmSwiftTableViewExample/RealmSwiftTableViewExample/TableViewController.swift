@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class DemoObject: RLMObject {
+class DemoObject: RealmObject {
     dynamic var title = ""
     dynamic var date = NSDate()
 }
@@ -35,28 +35,27 @@ class Cell: UITableViewCell {
 }
 
 class TableViewController: UITableViewController {
-    
-    var array = RLMArray(objectClassName: DemoObject.className())
-    var notificationToken: RLMNotificationToken?
+
+    var array = RealmArray<DemoObject>()
+    var notificationToken: RealmNotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupUI()
-        
-        // Set realm notification block
-        notificationToken = RLMRealm.defaultRealm().addNotificationBlock { note, realm in
+
+        notificationToken = Realm.defaultRealm().addNotificationBlock { _ in
             self.reloadData()
         }
-        
+
         reloadData()
     }
-    
+
     // UI
-    
+
     func setupUI() {
         tableView.registerClass(Cell.self, forCellReuseIdentifier: "cell")
-        
+
         self.title = "SwiftExample"
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "BG Add", style: .Plain, target: self, action: "backgroundAdd")
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
@@ -70,36 +69,36 @@ class TableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as Cell
-        
-        let object = array[UInt(indexPath.row)] as DemoObject
+
+        let object = array[UInt(indexPath.row)]
         cell.textLabel?.text = object.title
         cell.detailTextLabel?.text = object.date.description
-        
+
         return cell
     }
-    
+
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            let realm = RLMRealm.defaultRealm()
-            realm.beginWriteTransaction()
-            realm.deleteObject(array[UInt(indexPath.row)] as RLMObject)
-            realm.commitWriteTransaction()
+            let realm = Realm.defaultRealm()
+            realm.transactionWithBlock() {
+                realm.deleteObject(self.array[UInt(indexPath.row)])
+            }
         }
     }
-    
+
     // Actions
-    
+
     func reloadData() {
-        array = DemoObject.allObjects().arraySortedByProperty("date", ascending: true)
+        array = objects(DemoObject).arraySortedByProperty("date", ascending: true)
         tableView.reloadData()
     }
-    
+
     func backgroundAdd() {
         let queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
         // Import many items in a background thread
         dispatch_async(queue) {
             // Get new realm and table since we are in a new thread
-            let realm = RLMRealm.defaultRealm()
+            let realm = Realm.defaultRealm()
             realm.beginWriteTransaction()
             for index in 0..<5 {
                 // Add row via dictionary. Order is ignored.
@@ -108,20 +107,20 @@ class TableViewController: UITableViewController {
             realm.commitWriteTransaction()
         }
     }
-    
+
     func add() {
-        let realm = RLMRealm.defaultRealm()
+        let realm = Realm.defaultRealm()
         realm.beginWriteTransaction()
         DemoObject.createInRealm(realm, withObject: [TableViewController.randomString(), TableViewController.randomDate()])
         realm.commitWriteTransaction()
     }
-    
+
     // Helpers
-    
+
     class func randomString() -> String {
         return "Title \(arc4random())"
     }
-    
+
     class func randomDate() -> NSDate {
         return NSDate(timeIntervalSince1970: NSTimeInterval(arc4random()))
     }
