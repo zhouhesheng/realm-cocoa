@@ -26,7 +26,7 @@ class Dog: RealmObject {
 
 class Person: RealmObject {
     dynamic var name = ""
-    dynamic var dogs = RLMArray(objectClassName: Dog.className())
+    dynamic var dogs = RealmArrayProperty(Dog)
 }
 
 @UIApplicationMain
@@ -72,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         var person = Person()
         person.name = "Tim"
         person.dogs.addObject(mydog)
-        
+
         realm.transactionWithBlock() {
             realm.addObject(person)
         }
