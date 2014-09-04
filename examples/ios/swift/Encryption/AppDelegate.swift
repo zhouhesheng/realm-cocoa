@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class StringObject: RLMObject {
+class StringObject: RealmObject {
     dynamic var stringProp = ""
 }
 
@@ -35,12 +35,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window!.makeKeyAndVisible()
 
         // Realms are used to group data together
-        let realm = RLMRealm.defaultRealm() // Create realm pointing to default file
+        let realm = Realm.defaultRealm() // Create realm pointing to default file
 
         // Encrypt realm file
         var error: NSError?
         let success = NSFileManager.defaultManager().setAttributes([NSFileProtectionKey: NSFileProtectionComplete],
-            ofItemAtPath: RLMRealm.defaultRealm().path, error: &error)
+            ofItemAtPath: Realm.defaultRealmPath(), error: &error)
         if !success {
             println("encryption attribute was not successfully set on realm file")
             println("error: \(error?.localizedDescription)")
@@ -54,7 +54,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Read all string objects from the encrypted realm
-        println("all string objects: \(StringObject.allObjects())")
+        println("all string objects: \(objects(StringObject))")
 
         return true
     }

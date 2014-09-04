@@ -18,6 +18,14 @@
 
 import Foundation
 
+public typealias RealmObject = RLMObject
+public typealias RealmSchema = RLMSchema
+public typealias RealmObjectSchema = RLMObjectSchema
+public typealias RealmMigration = RLMMigration
+public typealias RealmNotificationToken = RLMNotificationToken
+public typealias RealmMigrationBlock = RLMMigrationBlock
+public typealias RealmNotificationBlock = RLMNotificationBlock
+
 @objc public class RLMSwiftSupport {
 
     public class func isSwiftClassName(className: NSString) -> Bool {

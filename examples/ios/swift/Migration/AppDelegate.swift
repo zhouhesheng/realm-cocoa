@@ -21,7 +21,7 @@ import Realm
 
 // Old data models
 /* V0
-class Person: RLMObject {
+class Person: RealmObject {
     dynamic var firstName = ""
     dynamic var lastName = ""
     dynamic var age = 0
@@ -29,19 +29,19 @@ class Person: RLMObject {
 */
 
 /* V1
-class Person: RLMObject {
+class Person: RealmObject {
     dynamic var fullName = ""        // combine firstName and lastName into single field
     dynamic var age = 0
 }
 */
 
 /* V2 */
-class Pet: RLMObject {
+class Pet: RealmObject {
     dynamic var name = ""
     dynamic var type = ""
 }
 
-class Person: RLMObject {
+class Person: RealmObject {
     dynamic var fullName = ""
     dynamic var age = 0
     dynamic var pets = RLMArray(objectClassName: Pet.className())
@@ -60,7 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // define a migration block
         // you can define this inline, but we will reuse this to migrate realm files from multiple versions
         // to the most current version of our data model
-        let migrationBlock: RLMMigrationBlock = { migration, oldSchemaVersion in
+        let migrationBlock: RealmMigrationBlock = { migration, oldSchemaVersion in
             if oldSchemaVersion < 1 {
                 migration.enumerateObjects(Person.className()) { oldObject, newObject in
                     if oldSchemaVersion < 1 {
@@ -88,8 +88,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //
         // Migrate the default realm over multiple data model versions
         //
-        let defaultPath = RLMRealm.defaultRealmPath()
-        let defaultParentPath = defaultPath.stringByDeletingLastPathComponent
+        let defaultPath = Realm.defaultRealmPath()
+        let defaultParentPath = Realm.defaultRealmPath().stringByDeletingLastPathComponent
 
         // copy over old data file for v0 data model
         let v0Path = NSBundle.mainBundle().resourcePath!.stringByAppendingPathComponent("default-v0.realm")
@@ -97,10 +97,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSFileManager.defaultManager().copyItemAtPath(v0Path, toPath: defaultPath, error: nil)
 
         // migrate default realm at v0 data model to the current version
-        RLMRealm.migrateDefaultRealmWithBlock(migrationBlock)
+        migrateDefaultRealmWithBlock(migrationBlock)
 
         // print out all migrated objects in the default realm
-        println("Migrated objects in the default Realm: \(Person.allObjects())")
+        println("Migrated objects in the default Realm: \(Realm.defaultRealm().objects(Person))")
 
         //
         // Migrate a realms at a custom paths
@@ -116,14 +116,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSFileManager.defaultManager().copyItemAtPath(v2Path, toPath: realmv2Path, error: nil)
 
         // migrate realms at custom paths
-        RLMRealm.migrateRealmAtPath(realmv1Path, withBlock: migrationBlock)
-        RLMRealm.migrateRealmAtPath(realmv2Path, withBlock: migrationBlock)
+        migrateRealmAtPath(realmv1Path, withBlock: migrationBlock)
+        migrateRealmAtPath(realmv2Path, withBlock: migrationBlock)
 
         // print out all migrated objects in the migrated realms
-        let realmv1 = RLMRealm.realmWithPath(realmv1Path, readOnly: false, error: nil)
-        println("Migrated objects in the Realm migrated from v1: \(Person.allObjectsInRealm(realmv1))")
-        let realmv2 = RLMRealm.realmWithPath(realmv2Path, readOnly: false, error: nil)
-        println("Migrated objects in the Realm migrated from v2: \(Person.allObjectsInRealm(realmv2))")
+        println("Migrated objects in the Realm migrated from v1: \(Realm(path: realmv1Path).objects(Person))")
+        println("Migrated objects in the Realm migrated from v2: \(Realm(path: realmv2Path).objects(Person))")
 
         return true
     }

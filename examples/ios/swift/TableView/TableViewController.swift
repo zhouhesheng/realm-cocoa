@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class DemoObject: RLMObject {
+class DemoObject: RealmObject {
     dynamic var title = ""
     dynamic var date = NSDate()
 }
@@ -35,17 +35,15 @@ class Cell: UITableViewCell {
 }
 
 class TableViewController: UITableViewController {
-
-    var array = RLMArray(objectClassName: DemoObject.className())
-    var notificationToken: RLMNotificationToken?
+    var array = RealmArray<DemoObject>()
+    var notificationToken: RealmNotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupUI()
 
-        // Set realm notification block
-        notificationToken = RLMRealm.defaultRealm().addNotificationBlock { note, realm in
+        notificationToken = Realm.defaultRealm().addNotificationBlock { _ in
             self.reloadData()
         }
 
@@ -71,7 +69,7 @@ class TableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as Cell
 
-        let object = array[UInt(indexPath.row)] as DemoObject
+        let object = array[UInt(indexPath.row)]
         cell.textLabel?.text = object.title
         cell.detailTextLabel?.text = object.date.description
 
@@ -80,17 +78,17 @@ class TableViewController: UITableViewController {
 
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            let realm = RLMRealm.defaultRealm()
-            realm.beginWriteTransaction()
-            realm.deleteObject(array[UInt(indexPath.row)] as RLMObject)
-            realm.commitWriteTransaction()
+            let realm = Realm.defaultRealm()
+            realm.transactionWithBlock() {
+                realm.deleteObject(self.array[UInt(indexPath.row)])
+            }
         }
     }
 
     // Actions
 
     func reloadData() {
-        array = DemoObject.allObjects().arraySortedByProperty("date", ascending: true)
+        array = objects(DemoObject).arraySortedByProperty("date", ascending: true)
         tableView.reloadData()
     }
 
@@ -99,7 +97,7 @@ class TableViewController: UITableViewController {
         // Import many items in a background thread
         dispatch_async(queue) {
             // Get new realm and table since we are in a new thread
-            let realm = RLMRealm.defaultRealm()
+            let realm = Realm.defaultRealm()
             realm.beginWriteTransaction()
             for index in 0..<5 {
                 // Add row via dictionary. Order is ignored.
@@ -110,7 +108,7 @@ class TableViewController: UITableViewController {
     }
 
     func add() {
-        let realm = RLMRealm.defaultRealm()
+        let realm = Realm.defaultRealm()
         realm.beginWriteTransaction()
         DemoObject.createInRealm(realm, withObject: [TableViewController.randomString(), TableViewController.randomDate()])
         realm.commitWriteTransaction()
