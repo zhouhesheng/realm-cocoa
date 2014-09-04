@@ -44,7 +44,7 @@ class Pet: RealmObject {
 class Person: RealmObject {
     dynamic var fullName = ""
     dynamic var age = 0
-    dynamic var pets = RLMArray(objectClassName: Pet.className())
+    dynamic var pets = RealmArrayProperty(Pet)
 }
 
 @UIApplicationMain
