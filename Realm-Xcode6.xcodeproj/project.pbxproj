@@ -158,8 +158,8 @@
 		E889EB1619B7FB7E00A55FFA /* Realm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1419B7FB7E00A55FFA /* Realm.swift */; };
 		E889EB1819B7FB8F00A55FFA /* RealmArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1719B7FB8F00A55FFA /* RealmArray.swift */; };
 		E889EB1919B7FB8F00A55FFA /* RealmArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1719B7FB8F00A55FFA /* RealmArray.swift */; };
-		E889EB1B19B7FBA100A55FFA /* RealmObject+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1A19B7FBA100A55FFA /* RealmObject+Extensions.swift */; };
-		E889EB1C19B7FBA100A55FFA /* RealmObject+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1A19B7FBA100A55FFA /* RealmObject+Extensions.swift */; };
+		E889EB1B19B7FBA100A55FFA /* Object+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1A19B7FBA100A55FFA /* Object+Extensions.swift */; };
+		E889EB1C19B7FBA100A55FFA /* Object+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E889EB1A19B7FBA100A55FFA /* Object+Extensions.swift */; };
 		E8917598197A1B350068ACC6 /* UnicodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8917597197A1B350068ACC6 /* UnicodeTests.m */; };
 		E8917599197A1B350068ACC6 /* UnicodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8917597197A1B350068ACC6 /* UnicodeTests.m */; };
 		E891759B197A1B600068ACC6 /* SwiftUnicodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E891759A197A1B600068ACC6 /* SwiftUnicodeTests.swift */; };
@@ -367,7 +367,7 @@
 		E856D1DF195614A400FB2FCF /* iOS Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "iOS Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E889EB1419B7FB7E00A55FFA /* Realm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Realm.swift; sourceTree = "<group>"; };
 		E889EB1719B7FB8F00A55FFA /* RealmArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmArray.swift; sourceTree = "<group>"; };
-		E889EB1A19B7FBA100A55FFA /* RealmObject+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RealmObject+Extensions.swift"; sourceTree = "<group>"; };
+		E889EB1A19B7FBA100A55FFA /* Object+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Object+Extensions.swift"; sourceTree = "<group>"; };
 		E8917597197A1B350068ACC6 /* UnicodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnicodeTests.m; sourceTree = "<group>"; };
 		E891759A197A1B600068ACC6 /* SwiftUnicodeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUnicodeTests.swift; sourceTree = "<group>"; };
 		E8951F01196C96DE00D6461C /* RLMRealm_Dynamic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMRealm_Dynamic.h; sourceTree = "<group>"; };
@@ -521,7 +521,7 @@
 				E8F8D904196CB87E00475368 /* RLMSwiftSupport.swift */,
 				E889EB1419B7FB7E00A55FFA /* Realm.swift */,
 				E889EB1719B7FB8F00A55FFA /* RealmArray.swift */,
-				E889EB1A19B7FBA100A55FFA /* RealmObject+Extensions.swift */,
+				E889EB1A19B7FBA100A55FFA /* Object+Extensions.swift */,
 			);
 			path = Swift;
 			sourceTree = "<group>";
@@ -1051,7 +1051,7 @@
 				E856D20B1956154C00FB2FCF /* RLMRealm.mm in Sources */,
 				E856D20E1956154C00FB2FCF /* RLMSchema.mm in Sources */,
 				E8F8D906196CB87E00475368 /* RLMSwiftSupport.swift in Sources */,
-				E889EB1C19B7FBA100A55FFA /* RealmObject+Extensions.swift in Sources */,
+				E889EB1C19B7FBA100A55FFA /* Object+Extensions.swift in Sources */,
 				E856D2121956154C00FB2FCF /* RLMUtil.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1120,7 +1120,7 @@
 				E81A1FA91955FC9300FDED82 /* RLMRealm.mm in Sources */,
 				E81A1FAD1955FC9300FDED82 /* RLMSchema.mm in Sources */,
 				E8F8D905196CB87E00475368 /* RLMSwiftSupport.swift in Sources */,
-				E889EB1B19B7FBA100A55FFA /* RealmObject+Extensions.swift in Sources */,
+				E889EB1B19B7FBA100A55FFA /* Object+Extensions.swift in Sources */,
 				E81A1FB11955FC9300FDED82 /* RLMUtil.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

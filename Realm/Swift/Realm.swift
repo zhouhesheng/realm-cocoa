@@ -16,23 +16,23 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-public func migrateDefaultRealmWithBlock(block: RealmMigrationBlock) {
+public func migrateDefaultRealmWithBlock(block: MigrationBlock) {
     RLMRealm.migrateDefaultRealmWithBlock(block)
 }
 
-public func migrateRealmAtPath(path: String, withBlock block: RealmMigrationBlock) {
+public func migrateRealmAtPath(path: String, withBlock block: MigrationBlock) {
     RLMRealm.migrateRealmAtPath(path, withBlock: block)
 }
 
-public func objects<T: RealmObject>(type: T.Type) -> RealmArray<T> {
+public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
     return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
 }
 
-public func objects<T: RealmObject>(type: T.Type, predicateFormat: String, args: CVarArgType...) -> RealmArray<T> {
+public func objects<T: Object>(type: T.Type, predicateFormat: String, args: CVarArgType...) -> RealmArray<T> {
     return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), `where`: predicateFormat, args: getVaList(args)))
 }
 
-public func objects<T: RealmObject>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
+public func objects<T: Object>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
     return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: predicate))
 }
 
@@ -40,7 +40,7 @@ public class Realm {
     var rlmRealm: RLMRealm
     public var path: String { return rlmRealm.path }
     public var readOnly: Bool { return rlmRealm.readOnly }
-    public var schema: RealmSchema { return rlmRealm.schema }
+    public var schema: Schema { return rlmRealm.schema }
     public var autorefresh: Bool {
         get {
             return rlmRealm.autorefresh
@@ -90,7 +90,7 @@ public class Realm {
         rlmRealm.refresh()
     }
 
-    public func addObject(object: RealmObject) {
+    public func addObject(object: Object) {
         rlmRealm.addObject(object)
     }
 
@@ -98,27 +98,27 @@ public class Realm {
         rlmRealm.addObjectsFromArray(objects)
     }
 
-    public func deleteObject(object: RealmObject) {
+    public func deleteObject(object: Object) {
         rlmRealm.deleteObject(object)
     }
 
-    public func addNotificationBlock(block: RealmNotificationBlock) -> RealmNotificationToken {
+    public func addNotificationBlock(block: NotificationBlock) -> NotificationToken {
         return rlmRealm.addNotificationBlock(block)
     }
 
-    public func removeNotification(notificationToken: RealmNotificationToken) {
+    public func removeNotification(notificationToken: NotificationToken) {
         rlmRealm.removeNotification(notificationToken)
     }
 
-    public func objects<T: RealmObject>(type: T.Type) -> RealmArray<T> {
+    public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(rlmRealm))
     }
 
-    public func objects<T: RealmObject>(type: T.Type, _ predicateFormat: String, _ args: CVarArgType...) -> RealmArray<T> {
+    public func objects<T: Object>(type: T.Type, _ predicateFormat: String, _ args: CVarArgType...) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: T.self.objectsInRealm(rlmRealm, `where`: predicateFormat, args: getVaList(args)))
     }
 
-    public func objects<T: RealmObject>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
+    public func objects<T: Object>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: T.self.objectsInRealm(rlmRealm, withPredicate: predicate))
     }
 }

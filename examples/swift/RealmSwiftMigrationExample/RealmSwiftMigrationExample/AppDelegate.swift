@@ -21,7 +21,7 @@ import Realm
 
 // Old data models
 /* V0
-class Person: RealmObject {
+class Person: Object {
     dynamic var firstName = ""
     dynamic var lastName = ""
     dynamic var age = 0
@@ -29,22 +29,22 @@ class Person: RealmObject {
 */
 
 /* V1
-class Person: RealmObject {
+class Person: Object {
     dynamic var fullName = ""        // combine firstName and lastName into single field
     dynamic var age = 0
 }
 */
 
 /* V2 */
-class Pet: RealmObject {
+class Pet: Object {
     dynamic var name = ""
     dynamic var type = ""
 }
 
-class Person: RealmObject {
+class Person: Object {
     dynamic var fullName = ""
     dynamic var age = 0
-    dynamic var pets = RealmArrayProperty(Pet)
+    dynamic var pets = ArrayProperty(Pet)
 }
 
 @UIApplicationMain
@@ -63,7 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // define a migration block
         // you can define this inline, but we will reuse this to migrate realm files from multiple versions
         // to the most current version of our data model
-        let migrationBlock: RealmMigrationBlock = { migration, oldSchemaVersion in
+        let migrationBlock: MigrationBlock = { migration, oldSchemaVersion in
             if oldSchemaVersion < 1 {
                 migration.enumerateObjects(Person.className()) { oldObject, newObject in
                     if oldSchemaVersion < 1 {

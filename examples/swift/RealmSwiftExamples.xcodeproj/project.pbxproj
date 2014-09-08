@@ -46,7 +46,7 @@
 		E856D2121956154C00FB2FCF /* RLMUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = E81A1F821955FC9300FDED82 /* RLMUtil.mm */; };
 		E862764219B7FCF1009697AB /* Realm.swift in Sources */ = {isa = PBXBuildFile; fileRef = E862763F19B7FCF1009697AB /* Realm.swift */; };
 		E862764319B7FCF1009697AB /* RealmArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = E862764019B7FCF1009697AB /* RealmArray.swift */; };
-		E862764419B7FCF1009697AB /* RealmObject+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E862764119B7FCF1009697AB /* RealmObject+Extensions.swift */; };
+		E862764419B7FCF1009697AB /* Object+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = E862764119B7FCF1009697AB /* Object+Extensions.swift */; };
 		E869107E19750754007D7005 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E869107A19750754007D7005 /* AppDelegate.swift */; };
 		E869107F19750754007D7005 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E869107B19750754007D7005 /* Images.xcassets */; };
 		E869108119750754007D7005 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E869107D19750754007D7005 /* TableViewController.swift */; };
@@ -188,7 +188,7 @@
 		E856D1D5195614A300FB2FCF /* Realm.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Realm.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E862763F19B7FCF1009697AB /* Realm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Realm.swift; sourceTree = "<group>"; };
 		E862764019B7FCF1009697AB /* RealmArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmArray.swift; sourceTree = "<group>"; };
-		E862764119B7FCF1009697AB /* RealmObject+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RealmObject+Extensions.swift"; sourceTree = "<group>"; };
+		E862764119B7FCF1009697AB /* Object+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Object+Extensions.swift"; sourceTree = "<group>"; };
 		E869107A19750754007D7005 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E869107B19750754007D7005 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		E869107C19750754007D7005 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -297,7 +297,7 @@
 			children = (
 				E862763F19B7FCF1009697AB /* Realm.swift */,
 				E862764019B7FCF1009697AB /* RealmArray.swift */,
-				E862764119B7FCF1009697AB /* RealmObject+Extensions.swift */,
+				E862764119B7FCF1009697AB /* Object+Extensions.swift */,
 				E8F8D904196CB87E00475368 /* RLMSwiftSupport.swift */,
 			);
 			path = Swift;
@@ -668,7 +668,7 @@
 				E856D20B1956154C00FB2FCF /* RLMRealm.mm in Sources */,
 				E856D20E1956154C00FB2FCF /* RLMSchema.mm in Sources */,
 				E8F8D906196CB87E00475368 /* RLMSwiftSupport.swift in Sources */,
-				E862764419B7FCF1009697AB /* RealmObject+Extensions.swift in Sources */,
+				E862764419B7FCF1009697AB /* Object+Extensions.swift in Sources */,
 				E856D2121956154C00FB2FCF /* RLMUtil.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

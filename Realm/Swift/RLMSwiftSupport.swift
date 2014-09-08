@@ -18,13 +18,13 @@
 
 import Foundation
 
-public typealias RealmObject = RLMObject
-public typealias RealmSchema = RLMSchema
-public typealias RealmObjectSchema = RLMObjectSchema
-public typealias RealmMigration = RLMMigration
-public typealias RealmNotificationToken = RLMNotificationToken
-public typealias RealmMigrationBlock = RLMMigrationBlock
-public typealias RealmNotificationBlock = RLMNotificationBlock
+public typealias Object = RLMObject
+public typealias Schema = RLMSchema
+public typealias ObjectSchema = RLMObjectSchema
+public typealias Migration = RLMMigration
+public typealias NotificationToken = RLMNotificationToken
+public typealias MigrationBlock = RLMMigrationBlock
+public typealias NotificationBlock = RLMNotificationBlock
 
 @objc public class RLMSwiftSupport {
 
