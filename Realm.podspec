@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                    = 'Realm'
-  s.version                 = `sh build.sh get-version`
+  s.version                 = '0.84.0'
   s.summary                 = 'Realm is a modern data framework & database for iOS & OSX.'
   s.description             = <<-DESC
                               Realm is a modern data framework & database for iOS & OSX. You can use it purely in memory — or persist to disk with extraordinary performance.
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
                               daily active users at a major mobile game company.
                               DESC
   s.homepage                = "http://realm.io"
-  s.source                  = { :git => 'https://github.com/Realm/realm-cocoa.git', :tag => "v#{s.version}" }
+  s.source                  = { :git => 'https://github.com/Realm/realm-cocoa.git', :branch => 'pod-test' }
   s.author                  = { 'Realm' => 'help@realm.io' }
   s.library                 = 'c++'
   s.requires_arc            = true
