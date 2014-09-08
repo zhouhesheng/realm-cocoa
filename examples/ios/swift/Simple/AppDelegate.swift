@@ -19,14 +19,14 @@
 import UIKit
 import Realm
 
-class Dog: RealmObject {
+class Dog: Object {
     dynamic var name = ""
     dynamic var age = 0
 }
 
-class Person: RealmObject {
+class Person: Object {
     dynamic var name = ""
-    dynamic var dogs = RealmArrayProperty(Dog)
+    dynamic var dogs = ArrayProperty(Dog)
 }
 
 @UIApplicationMain

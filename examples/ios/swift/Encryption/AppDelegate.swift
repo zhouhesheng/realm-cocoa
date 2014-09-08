@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class StringObject: RealmObject {
+class StringObject: Object {
     dynamic var stringProp = ""
 }
 

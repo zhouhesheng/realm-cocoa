@@ -16,7 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-extension RealmObject {
+extension Object {
 
     public class func createInRealm(realm: Realm, withObject object: AnyObject) -> Self {
         return createInRealm(realm.rlmRealm, withObject: object)

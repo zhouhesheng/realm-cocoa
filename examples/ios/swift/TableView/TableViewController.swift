@@ -19,7 +19,7 @@
 import UIKit
 import Realm
 
-class DemoObject: RealmObject {
+class DemoObject: Object {
     dynamic var title = ""
     dynamic var date = NSDate()
 }
@@ -36,7 +36,7 @@ class Cell: UITableViewCell {
 
 class TableViewController: UITableViewController {
     var array = RealmArray<DemoObject>()
-    var notificationToken: RealmNotificationToken?
+    var notificationToken: NotificationToken?
 
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -16,20 +16,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-public typealias RealmArrayProperty = RLMArray
+public typealias ArrayProperty = RLMArray
 
-public extension RealmArrayProperty {
+public extension ArrayProperty {
 
-    public convenience init<T: RealmObject>(_: T.Type) {
+    public convenience init<T: Object>(_: T.Type) {
         self.init(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self)))
     }
 
-    public func realmArray<T: RealmObject>(_: T.Type) -> RealmArray<T> {
+    public func realmArray<T: Object>(_: T.Type) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: self)
     }
 }
 
-public class RealmArray<T: RealmObject>: SequenceType, Printable {
+public class RealmArray<T: Object>: SequenceType, Printable {
     var rlmArray: RLMArray
     public var count: UInt { return rlmArray.count }
     public var objectClassName: String { return rlmArray.objectClassName }
