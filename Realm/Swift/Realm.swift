@@ -94,7 +94,7 @@ public class Realm {
         rlmRealm.addObject(object)
     }
 
-    public func addObjects(objects: [AnyObject]) {
+    public func addObjects(objects: [Object]) {
         rlmRealm.addObjectsFromArray(objects)
     }
 

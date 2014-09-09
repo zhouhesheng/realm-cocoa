@@ -125,7 +125,7 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         rlmArray.addObject(object)
     }
 
-    public func addObjects(objects: [AnyObject]) {
+    public func addObjects(objects: [T]) {
         rlmArray.addObjectsFromArray(objects)
     }
 
