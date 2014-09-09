@@ -16,6 +16,15 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+public protocol Sortable {}
+extension NSDate: Sortable {}
+extension Int16: Sortable {}
+extension Int32: Sortable {}
+extension Int: Sortable {}
+extension Int64: Sortable {}
+extension Float: Sortable {}
+extension Double: Sortable {}
+
 public typealias ArrayProperty = RLMArray
 
 public extension ArrayProperty {
@@ -90,12 +99,12 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return RealmArray<T>(rlmArray: rlmArray.arraySortedByProperty(property, ascending: ascending))
     }
 
-    public func minOfProperty(property: String) -> AnyObject {
-        return rlmArray.minOfProperty(property)
+    public func minOfProperty<U: Sortable>(property: String) -> U {
+        return rlmArray.minOfProperty(property) as U
     }
 
-    public func maxOfProperty(property: String) -> AnyObject {
-        return rlmArray.maxOfProperty(property)
+    public func maxOfProperty<U: Sortable>(property: String) -> U {
+        return rlmArray.maxOfProperty(property) as U
     }
 
     public func sumOfProperty(property: String) -> Double {
