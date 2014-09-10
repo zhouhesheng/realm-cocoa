@@ -541,13 +541,13 @@
 			children = (
 				E8F8D904196CB87E00475368 /* RLMSwiftSupport.swift */,
 				E8AC477F19BFCD800003750C /* Aliases.swift */,
-				E889EB1419B7FB7E00A55FFA /* Realm.swift */,
-				E889EB1719B7FB8F00A55FFA /* RealmArray.swift */,
+				E8AC477C19BFC1720003750C /* Migration.swift */,
 				E889EB1A19B7FBA100A55FFA /* Object+Extensions.swift */,
-				E8AC477319BFBD030003750C /* Schema.swift */,
 				E8AC477619BFBEC70003750C /* ObjectSchema.swift */,
 				E8AC477919BFBFA30003750C /* Property.swift */,
-				E8AC477C19BFC1720003750C /* Migration.swift */,
+				E889EB1419B7FB7E00A55FFA /* Realm.swift */,
+				E889EB1719B7FB8F00A55FFA /* RealmArray.swift */,
+				E8AC477319BFBD030003750C /* Schema.swift */,
 			);
 			path = Swift;
 			sourceTree = "<group>";

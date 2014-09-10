@@ -16,6 +16,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+// MARK: Notifications
+
 public enum Notification: String {
     case DidChange = "RLMRealmDidChangeNotification"
 }
@@ -28,6 +30,8 @@ func rlmNotificationBlockFromNotificationBlock(notificationBlock: NotificationBl
     }
 }
 
+// MARK: Migrations
+
 public func migrateDefaultRealm(block: MigrationBlock) {
     RLMRealm.migrateDefaultRealmWithBlock(rlmMigrationBlockFromMigrationBlock(block))
 }
@@ -35,6 +39,8 @@ public func migrateDefaultRealm(block: MigrationBlock) {
 public func migrateRealm(path: String, block: MigrationBlock) {
     RLMRealm.migrateRealmAtPath(path, withBlock: rlmMigrationBlockFromMigrationBlock(block))
 }
+
+// MARK: Object Retrieval
 
 public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
     return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
@@ -48,6 +54,8 @@ public func objects<T: Object>(type: T.Type, filter: NSPredicate) -> RealmArray<
     return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: filter))
 }
 
+// MARK: Default Realm Helpers
+
 public func defaultRealmPath() -> String {
     return RLMRealm.defaultRealmPath()
 }
@@ -57,6 +65,8 @@ public func defaultRealm() -> Realm {
 }
 
 public class Realm {
+    // MARK: Properties
+
     var rlmRealm: RLMRealm
     public var path: String { return rlmRealm.path }
     public var readOnly: Bool { return rlmRealm.readOnly }
@@ -70,6 +80,8 @@ public class Realm {
         }
     }
 
+    // MARK: Initializers
+
     init(rlmRealm: RLMRealm) {
         self.rlmRealm = rlmRealm
     }
@@ -82,9 +94,13 @@ public class Realm {
         self.init(rlmRealm: RLMRealm.realmWithPath(path, readOnly: readonly, error: error))
     }
 
+    // MARK: In-Memory
+
     public class func useInMemoryDefaultRealm() {
         RLMRealm.useInMemoryDefaultRealm()
     }
+
+    // MARK: Transactions
 
     public func transaction(block: (() -> Void)) {
         rlmRealm.transactionWithBlock(block)
@@ -98,9 +114,13 @@ public class Realm {
         rlmRealm.commitWriteTransaction()
     }
 
+    // MARK: Refresh
+
     public func refresh() {
         rlmRealm.refresh()
     }
+
+    // MARK: Mutating
 
     public func add(object: Object) {
         rlmRealm.addObject(object)
@@ -114,6 +134,8 @@ public class Realm {
         rlmRealm.deleteObject(object)
     }
 
+    // MARK: Notifications
+
     public func addNotificationBlock(block: NotificationBlock) -> NotificationToken {
         return rlmRealm.addNotificationBlock(rlmNotificationBlockFromNotificationBlock(block))
     }
@@ -121,6 +143,8 @@ public class Realm {
     public func removeNotification(notificationToken: NotificationToken) {
         rlmRealm.removeNotification(notificationToken)
     }
+
+    // MARK: Object Retrieval
 
     public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(rlmRealm))
