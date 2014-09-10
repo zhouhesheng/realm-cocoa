@@ -169,6 +169,8 @@
 		E891759B197A1B600068ACC6 /* SwiftUnicodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E891759A197A1B600068ACC6 /* SwiftUnicodeTests.swift */; };
 		E8951F02196C96DE00D6461C /* RLMRealm_Dynamic.h in Headers */ = {isa = PBXBuildFile; fileRef = E8951F01196C96DE00D6461C /* RLMRealm_Dynamic.h */; };
 		E8951F03196C96DE00D6461C /* RLMRealm_Dynamic.h in Headers */ = {isa = PBXBuildFile; fileRef = E8951F01196C96DE00D6461C /* RLMRealm_Dynamic.h */; };
+		E8A2F8EF19C1190D00137C6A /* Sortable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A2F8EE19C1190D00137C6A /* Sortable.swift */; };
+		E8A2F8F019C1190D00137C6A /* Sortable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A2F8EE19C1190D00137C6A /* Sortable.swift */; };
 		E8A5DEED1968E520006A50F6 /* RLMPredicateUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A543AE195C9C9E00990A20 /* RLMPredicateUtil.m */; };
 		E8A5DEEE1968E521006A50F6 /* RLMPredicateUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = E8A543AE195C9C9E00990A20 /* RLMPredicateUtil.m */; };
 		E8AC477419BFBD030003750C /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8AC477319BFBD030003750C /* Schema.swift */; };
@@ -387,6 +389,7 @@
 		E8917597197A1B350068ACC6 /* UnicodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UnicodeTests.m; sourceTree = "<group>"; };
 		E891759A197A1B600068ACC6 /* SwiftUnicodeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUnicodeTests.swift; sourceTree = "<group>"; };
 		E8951F01196C96DE00D6461C /* RLMRealm_Dynamic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMRealm_Dynamic.h; sourceTree = "<group>"; };
+		E8A2F8EE19C1190D00137C6A /* Sortable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sortable.swift; sourceTree = "<group>"; };
 		E8A543AD195C9C9E00990A20 /* RLMPredicateUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RLMPredicateUtil.h; sourceTree = "<group>"; };
 		E8A543AE195C9C9E00990A20 /* RLMPredicateUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RLMPredicateUtil.m; sourceTree = "<group>"; };
 		E8AC477319BFBD030003750C /* Schema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
@@ -548,6 +551,7 @@
 				E889EB1419B7FB7E00A55FFA /* Realm.swift */,
 				E889EB1719B7FB8F00A55FFA /* RealmArray.swift */,
 				E8AC477319BFBD030003750C /* Schema.swift */,
+				E8A2F8EE19C1190D00137C6A /* Sortable.swift */,
 			);
 			path = Swift;
 			sourceTree = "<group>";
@@ -1078,6 +1082,7 @@
 				E856D1FB1956154C00FB2FCF /* RLMConstants.m in Sources */,
 				0207AB84195DF9FB007EFB12 /* RLMMigration.mm in Sources */,
 				E856D1FE1956154C00FB2FCF /* RLMObject.mm in Sources */,
+				E8A2F8F019C1190D00137C6A /* Sortable.swift in Sources */,
 				E889EB1619B7FB7E00A55FFA /* Realm.swift in Sources */,
 				E856D2011956154C00FB2FCF /* RLMObjectSchema.mm in Sources */,
 				E856D2031956154C00FB2FCF /* RLMObjectStore.mm in Sources */,
@@ -1153,6 +1158,7 @@
 				E81A1F931955FC9300FDED82 /* RLMConstants.m in Sources */,
 				0207AB83195DF9FB007EFB12 /* RLMMigration.mm in Sources */,
 				E81A1F971955FC9300FDED82 /* RLMObject.mm in Sources */,
+				E8A2F8EF19C1190D00137C6A /* Sortable.swift in Sources */,
 				E889EB1519B7FB7E00A55FFA /* Realm.swift in Sources */,
 				E81A1F9B1955FC9300FDED82 /* RLMObjectSchema.mm in Sources */,
 				E81A1F9E1955FC9300FDED82 /* RLMObjectStore.mm in Sources */,

@@ -16,17 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-// Sortable Realm types
-// Useful for minForProperty()/maxForProperty()
-public protocol Sortable {}
-extension NSDate: Sortable {}
-extension Int16: Sortable {}
-extension Int32: Sortable {}
-extension Int: Sortable {}
-extension Int64: Sortable {}
-extension Float: Sortable {}
-extension Double: Sortable {}
-
 // Since RLMArray's should only be used as object properties, typealias to ArrayProperty
 public typealias ArrayProperty = RLMArray
 
@@ -65,6 +54,20 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         self.rlmArray = rlmArray
     }
 
+    // MARK: Index Retrieval
+
+    public func indexOf(object: T) -> UInt? {
+        return rlmArray.indexOfObject(object)
+    }
+
+    public func indexWhere(predicate: NSPredicate) -> UInt? {
+        return rlmArray.indexOfObjectWithPredicate(predicate)
+    }
+
+    public func indexWhere(predicateFormat: String, _ args: CVarArgType...) -> UInt {
+        return rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args))
+    }
+
     // MARK: Object Retrieval
 
     public subscript(index: UInt) -> T? {
@@ -82,20 +85,6 @@ public class RealmArray<T: Object>: SequenceType, Printable {
 
     public func last() -> T? {
         return rlmArray.lastObject() as T?
-    }
-
-    // MARK: Index Retrieval
-
-    public func indexOf(object: T) -> UInt? {
-        return rlmArray.indexOfObject(object)
-    }
-
-    public func indexWhere(predicate: NSPredicate) -> UInt? {
-        return rlmArray.indexOfObjectWithPredicate(predicate)
-    }
-
-    public func indexWhere(predicateFormat: String, _ args: CVarArgType...) -> UInt {
-        return rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args))
     }
 
     // MARK: Subarray Retrieval
