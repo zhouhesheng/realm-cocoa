@@ -16,9 +16,18 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-extension Object {
+public func ==(lhs: Property, rhs: Property) -> Bool {
+    return lhs.rlmProperty.isEqualToProperty(rhs.rlmProperty)
+}
 
-    public class func create(realm: Realm, object: AnyObject) -> Self {
-        return createInRealm(realm.rlmRealm, withObject: object)
+public class Property: Equatable {
+    var rlmProperty: RLMProperty
+    public var name: String { return rlmProperty.name }
+    public var type: PropertyType { return rlmProperty.type }
+    public var attributes: PropertyAttributes { return rlmProperty.attributes }
+    public var objectClassName: String { return rlmProperty.objectClassName }
+
+    init(rlmProperty: RLMProperty) {
+        self.rlmProperty = rlmProperty
     }
 }

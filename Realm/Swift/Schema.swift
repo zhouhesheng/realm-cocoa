@@ -16,9 +16,26 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-extension Object {
+public class Schema {
+    var rlmSchema: RLMSchema
+    public var objectSchema: [ObjectSchema] { return rlmSchema.objectSchema as [ObjectSchema] }
 
-    public class func create(realm: Realm, object: AnyObject) -> Self {
-        return createInRealm(realm.rlmRealm, withObject: object)
+    public init() {
+        rlmSchema = RLMSchema()
+    }
+
+    convenience init(rlmSchema: RLMSchema) {
+        self.init()
+        self.rlmSchema = rlmSchema
+    }
+
+    public func schemaForClassName(className: String) -> ObjectSchema {
+        return ObjectSchema(rlmObjectSchema: rlmSchema.schemaForClassName(className))
+    }
+
+    public subscript(className: String) -> ObjectSchema {
+        get {
+            return schemaForClassName(className)
+        }
     }
 }

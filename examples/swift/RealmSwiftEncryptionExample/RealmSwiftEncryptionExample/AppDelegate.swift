@@ -38,22 +38,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window!.rootViewController = rootVC
 
         // Realms are used to group data together
-        let realm = Realm.defaultRealm() // Create realm pointing to default file
+        let realm = defaultRealm() // Create realm pointing to default file
 
         // Encrypt realm file
         var error: NSError?
         let success = NSFileManager.defaultManager().setAttributes([NSFileProtectionKey: NSFileProtectionComplete],
-            ofItemAtPath: Realm.defaultRealmPath(), error: &error)
+            ofItemAtPath: defaultRealmPath(), error: &error)
         if !success {
             println("encryption attribute was not successfully set on realm file")
             println("error: \(error?.localizedDescription)")
         }
-        
+
         // Save your object
-        realm.transactionWithBlock() {
+        realm.transaction() {
             let obj = StringObject()
             obj.stringProp = "abcd"
-            realm.addObject(obj)
+            realm.add(obj)
         }
 
         // Read all string objects from the encrypted realm

@@ -16,9 +16,13 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-extension Object {
+// Realm introspection depends on models to directly subclass RLMObject
+// so we typealias it to remove the 'RLM' prefix
+public typealias Object = RLMObject
 
-    public class func create(realm: Realm, object: AnyObject) -> Self {
-        return createInRealm(realm.rlmRealm, withObject: object)
-    }
-}
+// These types don't change when wrapping in Swift
+// so we just typealias them to remove the 'RLM' prefix
+public typealias PropertyType = RLMPropertyType
+public typealias PropertyAttributes = RLMPropertyAttributes
+public typealias NotificationToken = RLMNotificationToken
+public typealias ObjectMigrationBlock = RLMObjectMigrationBlock

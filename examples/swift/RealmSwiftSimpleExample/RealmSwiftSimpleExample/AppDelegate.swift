@@ -54,11 +54,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         println("Name of dog: \(mydog.name)")
         
         // Realms are used to group data together
-        let realm = Realm.defaultRealm() // Create realm pointing to default file
+        let realm = defaultRealm() // Create realm pointing to default file
         
         // Save your object
-        realm.transactionWithBlock() {
-            realm.addObject(mydog)
+        realm.transaction() {
+            realm.add(mydog)
         }
         
         // Query
@@ -73,11 +73,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         person.name = "Tim"
         person.dogs.addObject(mydog)
 
-        realm.transactionWithBlock() {
-            realm.addObject(person)
+        realm.transaction() {
+            realm.add(person)
         }
 
-        // Thread-safety
+        // Multi-threading
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
             var otherResults = objects(Dog.self, "name contains 'Rex'")
             println("Number of dogs \(otherResults.count)")

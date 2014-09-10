@@ -18,14 +18,6 @@
 
 import Foundation
 
-public typealias Object = RLMObject
-public typealias Schema = RLMSchema
-public typealias ObjectSchema = RLMObjectSchema
-public typealias Migration = RLMMigration
-public typealias NotificationToken = RLMNotificationToken
-public typealias MigrationBlock = RLMMigrationBlock
-public typealias NotificationBlock = RLMNotificationBlock
-
 @objc public class RLMSwiftSupport {
 
     public class func isSwiftClassName(className: NSString) -> Bool {

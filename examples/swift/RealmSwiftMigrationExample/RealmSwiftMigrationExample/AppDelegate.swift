@@ -65,7 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // to the most current version of our data model
         let migrationBlock: MigrationBlock = { migration, oldSchemaVersion in
             if oldSchemaVersion < 1 {
-                migration.enumerateObjects(Person.className()) { oldObject, newObject in
+                migration.enumerate(Person.className()) { oldObject, newObject in
                     if oldSchemaVersion < 1 {
                         // combine name fields into a single field
                         let firstName = oldObject["firstName"] as String
@@ -75,7 +75,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
             if oldSchemaVersion < 2 {
-                migration.enumerateObjects(Person.className()) { oldObject, newObject in
+                migration.enumerate(Person.className()) { oldObject, newObject in
                     // give JP a dog
                     if newObject["fullName"] as String == "JP McDonald" {
                         let jpsDog = Pet(object: ["Jimbo", "dog"])
@@ -91,8 +91,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //
         // Migrate the default realm over multiple data model versions
         //
-        let defaultPath = Realm.defaultRealmPath()
-        let defaultParentPath = Realm.defaultRealmPath().stringByDeletingLastPathComponent
+        let defaultPath = defaultRealmPath()
+        let defaultParentPath = defaultPath.stringByDeletingLastPathComponent
 
         // copy over old data file for v0 data model
         let v0Path = NSBundle.mainBundle().resourcePath!.stringByAppendingPathComponent("default-v0.realm")
@@ -103,7 +103,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         migrateDefaultRealmWithBlock(migrationBlock)
 
         // print out all migrated objects in the default realm
-        println("Migrated objects in the default Realm: \(Realm.defaultRealm().objects(Person))")
+        println("Migrated objects in the default Realm: \(objects(Person))")
 
         //
         // Migrate a realms at a custom paths
