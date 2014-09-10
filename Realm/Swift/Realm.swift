@@ -28,11 +28,11 @@ func rlmNotificationBlockFromNotificationBlock(notificationBlock: NotificationBl
     }
 }
 
-public func migrateDefaultRealmWithBlock(block: MigrationBlock) {
+public func migrateDefaultRealm(block: MigrationBlock) {
     RLMRealm.migrateDefaultRealmWithBlock(rlmMigrationBlockFromMigrationBlock(block))
 }
 
-public func migrateRealmAtPath(path: String, withBlock block: MigrationBlock) {
+public func migrateRealm(path: String, block: MigrationBlock) {
     RLMRealm.migrateRealmAtPath(path, withBlock: rlmMigrationBlockFromMigrationBlock(block))
 }
 
