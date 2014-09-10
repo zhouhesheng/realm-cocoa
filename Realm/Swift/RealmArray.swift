@@ -16,6 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+// Sortable Realm types
 public protocol Sortable {}
 extension NSDate: Sortable {}
 extension Int16: Sortable {}
@@ -41,7 +42,6 @@ public extension ArrayProperty {
 public class RealmArray<T: Object>: SequenceType, Printable {
     var rlmArray: RLMArray
     public var count: UInt { return rlmArray.count }
-    public var objectClassName: String { return rlmArray.objectClassName }
     public var readOnly: Bool { return rlmArray.readOnly }
     public var realm: Realm { return Realm(rlmRealm: rlmArray.realm) }
 
@@ -51,7 +51,7 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         rlmArray = RLMArray(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self)))
     }
 
-    public convenience init(rlmArray: RLMArray) {
+    convenience init(rlmArray: RLMArray) {
         self.init()
         self.rlmArray = rlmArray
     }
@@ -65,25 +65,25 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         }
     }
 
-    public func firstObject() -> T? {
+    public func first() -> T? {
         return rlmArray.firstObject() as T?
     }
 
-    public func lastObject() -> T? {
+    public func last() -> T? {
         return rlmArray.lastObject() as T?
     }
 
-    public func indexOfObject(object: T) -> UInt? {
+    public func indexOf(object: T) -> UInt? {
         return rlmArray.indexOfObject(object)
     }
 
-    public func indexOfObjectWithPredicate(predicate: NSPredicate) -> UInt? {
+    public func indexWhere(predicate: NSPredicate) -> UInt? {
         return rlmArray.indexOfObjectWithPredicate(predicate)
     }
 
     // Swift query convenience functions
 
-    public func indexOfObjectWhere(predicateFormat: String, _ args: CVarArgType...) -> UInt {
+    public func indexWhere(predicateFormat: String, _ args: CVarArgType...) -> UInt {
         return rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args))
     }
 
@@ -91,7 +91,7 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return RealmArray<T>(rlmArray: rlmArray.objectsWhere(predicateFormat, args: getVaList(args)))
     }
 
-    public func objectsWithPredicate(predicate: NSPredicate) -> RealmArray<T> {
+    public func objectsWhere(predicate: NSPredicate) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: rlmArray.objectsWithPredicate(predicate))
     }
 
@@ -130,31 +130,37 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         }
     }
 
-    public func addObject(object: T) {
+    public func add(object: T) {
         rlmArray.addObject(object)
     }
 
-    public func addObjects(objects: [AnyObject]) {
+    public func add(objects: [T]) {
         rlmArray.addObjectsFromArray(objects)
     }
 
-    public func insertObject(object: T, atIndex index: UInt) {
+    public func insert(object: T, atIndex index: UInt) {
         rlmArray.insertObject(object, atIndex: index)
     }
 
-    public func removeObjectAtIndex(index: UInt) {
+    public func remove(index: UInt) {
         rlmArray.removeObjectAtIndex(index)
     }
 
-    public func removeLastObject() {
+    public func remove(object: T) {
+        if let index = indexOf(object) {
+            remove(index)
+        }
+    }
+
+    public func removeLast() {
         rlmArray.removeLastObject()
     }
 
-    public func removeAllObjects() {
+    public func removeAll() {
         rlmArray.removeAllObjects()
     }
 
-    public func replaceObjectAtIndex(index: UInt, withObject object: T) {
+    public func replace(index: UInt, object: T) {
         rlmArray.replaceObjectAtIndex(index, withObject: object)
     }
 }

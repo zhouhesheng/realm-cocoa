@@ -16,31 +16,51 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+public enum Notification: String {
+    case DidChange = "RLMRealmDidChangeNotification"
+}
+
+public typealias NotificationBlock = (notification: Notification, realm: Realm) -> Void
+
+func rlmNotificationBlockFromNotificationBlock(notificationBlock: NotificationBlock) -> RLMNotificationBlock {
+    return { rlmNotification, rlmRealm in
+        return notificationBlock(notification: Notification.fromRaw(rlmNotification)!, realm: Realm(rlmRealm: rlmRealm))
+    }
+}
+
 public func migrateDefaultRealmWithBlock(block: MigrationBlock) {
-    RLMRealm.migrateDefaultRealmWithBlock(block)
+    RLMRealm.migrateDefaultRealmWithBlock(rlmMigrationBlockFromMigrationBlock(block))
 }
 
 public func migrateRealmAtPath(path: String, withBlock block: MigrationBlock) {
-    RLMRealm.migrateRealmAtPath(path, withBlock: block)
+    RLMRealm.migrateRealmAtPath(path, withBlock: rlmMigrationBlockFromMigrationBlock(block))
 }
 
 public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
     return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
 }
 
-public func objects<T: Object>(type: T.Type, predicateFormat: String, args: CVarArgType...) -> RealmArray<T> {
-    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), `where`: predicateFormat, args: getVaList(args)))
+public func objects<T: Object>(type: T.Type, filter: String, args: CVarArgType...) -> RealmArray<T> {
+    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), `where`: filter, args: getVaList(args)))
 }
 
-public func objects<T: Object>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
-    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: predicate))
+public func objects<T: Object>(type: T.Type, filter: NSPredicate) -> RealmArray<T> {
+    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: filter))
+}
+
+public func defaultRealmPath() -> String {
+    return RLMRealm.defaultRealmPath()
+}
+
+public func defaultRealm() -> Realm {
+    return Realm(rlmRealm: RLMRealm.defaultRealm())
 }
 
 public class Realm {
     var rlmRealm: RLMRealm
     public var path: String { return rlmRealm.path }
     public var readOnly: Bool { return rlmRealm.readOnly }
-    public var schema: Schema { return rlmRealm.schema }
+    public var schema: Schema { return Schema(rlmSchema: rlmRealm.schema) }
     public var autorefresh: Bool {
         get {
             return rlmRealm.autorefresh
@@ -48,14 +68,6 @@ public class Realm {
         set {
             rlmRealm.autorefresh = newValue
         }
-    }
-
-    public class func defaultRealmPath() -> String {
-        return RLMRealm.defaultRealmPath()
-    }
-
-    public class func defaultRealm() -> Realm {
-        return Realm(rlmRealm: RLMRealm.defaultRealm())
     }
 
     init(rlmRealm: RLMRealm) {
@@ -74,7 +86,7 @@ public class Realm {
         RLMRealm.useInMemoryDefaultRealm()
     }
 
-    public func transactionWithBlock(block: (() -> Void)) {
+    public func transaction(block: (() -> Void)) {
         rlmRealm.transactionWithBlock(block)
     }
 
@@ -90,20 +102,20 @@ public class Realm {
         rlmRealm.refresh()
     }
 
-    public func addObject(object: Object) {
+    public func add(object: Object) {
         rlmRealm.addObject(object)
     }
 
-    public func addObjects(objects: [AnyObject]) {
+    public func add(objects: [Object]) {
         rlmRealm.addObjectsFromArray(objects)
     }
 
-    public func deleteObject(object: Object) {
+    public func delete(object: Object) {
         rlmRealm.deleteObject(object)
     }
 
     public func addNotificationBlock(block: NotificationBlock) -> NotificationToken {
-        return rlmRealm.addNotificationBlock(block)
+        return rlmRealm.addNotificationBlock(rlmNotificationBlockFromNotificationBlock(block))
     }
 
     public func removeNotification(notificationToken: NotificationToken) {

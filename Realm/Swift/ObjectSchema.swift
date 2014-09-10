@@ -16,9 +16,22 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-extension Object {
+public class ObjectSchema {
+    var rlmObjectSchema: RLMObjectSchema
+    public var className: String { return rlmObjectSchema.className }
 
-    public class func create(realm: Realm, object: AnyObject) -> Self {
-        return createInRealm(realm.rlmRealm, withObject: object)
+    public init() {
+        rlmObjectSchema = RLMObjectSchema()
+    }
+
+    convenience init(rlmObjectSchema: RLMObjectSchema) {
+        self.init()
+        self.rlmObjectSchema = rlmObjectSchema
+    }
+
+    public subscript(propertyName: String) -> Property {
+        get {
+            return Property(rlmProperty: rlmObjectSchema[className])
+        }
     }
 }
