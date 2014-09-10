@@ -18,7 +18,8 @@
 
 extension Object {
 
-    public class func create(realm: Realm, object: AnyObject) -> Self {
+    // Override createInRealm() to accept Realm instead of RLMRealm
+    public class func createInRealm(realm: Realm, withObject object: AnyObject) -> Self {
         return createInRealm(realm.rlmRealm, withObject: object)
     }
 }

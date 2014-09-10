@@ -17,25 +17,24 @@
 ////////////////////////////////////////////////////////////////////////////
 
 public class Schema {
+    // MARK: Properties
+
     var rlmSchema: RLMSchema
     public var objectSchema: [ObjectSchema] { return rlmSchema.objectSchema as [ObjectSchema] }
 
-    public init() {
-        rlmSchema = RLMSchema()
-    }
+    // MARK: Initializers
 
-    convenience init(rlmSchema: RLMSchema) {
-        self.init()
+    init(rlmSchema: RLMSchema) {
         self.rlmSchema = rlmSchema
     }
+
+    // MARK: ObjectSchema Retrieval
 
     public func schemaForClassName(className: String) -> ObjectSchema {
         return ObjectSchema(rlmObjectSchema: rlmSchema.schemaForClassName(className))
     }
 
     public subscript(className: String) -> ObjectSchema {
-        get {
-            return schemaForClassName(className)
-        }
+        return schemaForClassName(className)
     }
 }

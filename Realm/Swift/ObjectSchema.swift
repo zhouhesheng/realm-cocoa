@@ -17,21 +17,21 @@
 ////////////////////////////////////////////////////////////////////////////
 
 public class ObjectSchema {
+    // MARK: Properties
+
     var rlmObjectSchema: RLMObjectSchema
     public var className: String { return rlmObjectSchema.className }
+    public var properties: [Property] { return rlmObjectSchema.properties as [Property] }
 
-    public init() {
-        rlmObjectSchema = RLMObjectSchema()
-    }
+    // MARK: Initializers
 
-    convenience init(rlmObjectSchema: RLMObjectSchema) {
-        self.init()
+    init(rlmObjectSchema: RLMObjectSchema) {
         self.rlmObjectSchema = rlmObjectSchema
     }
 
+    // MARK: Property Retrieval
+
     public subscript(propertyName: String) -> Property {
-        get {
-            return Property(rlmProperty: rlmObjectSchema[className])
-        }
+        return Property(rlmProperty: rlmObjectSchema[className])
     }
 }

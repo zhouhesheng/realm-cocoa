@@ -69,7 +69,7 @@ class TableViewController: UITableViewController {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as Cell
 
-        let object = array[UInt(indexPath.row)]
+        let object = array[UInt(indexPath.row)]!
         cell.textLabel?.text = object.title
         cell.detailTextLabel?.text = object.date.description
 
@@ -80,7 +80,7 @@ class TableViewController: UITableViewController {
         if editingStyle == .Delete {
             let realm = defaultRealm()
             realm.transaction() {
-                realm.delete(self.array[UInt(indexPath.row)])
+                realm.delete(self.array[UInt(indexPath.row)]!)
             }
         }
     }
@@ -97,21 +97,21 @@ class TableViewController: UITableViewController {
         // Import many items in a background thread
         dispatch_async(queue) {
             // Get new realm and table since we are in a new thread
-            let realm = defaultRealm()
-            realm.beginWriteTransaction()
-            for index in 0..<5 {
-                // Add row via dictionary. Order is ignored.
-                DemoObject.create(realm, object: ["title": TableViewController.randomString(), "date": TableViewController.randomDate()])
+            defaultRealm().transaction() {
+                for index in 0..<5 {
+                    // Add object via Dictionary. Order is ignored.
+                    DemoObject.createInDefaultRealmWithObject(["title": TableViewController.randomString(), "date": TableViewController.randomDate()])
+                }
             }
-            realm.commitWriteTransaction()
         }
     }
 
     func add() {
-        let realm = defaultRealm()
-        realm.beginWriteTransaction()
-        DemoObject.create(realm, object: [TableViewController.randomString(), TableViewController.randomDate()])
-        realm.commitWriteTransaction()
+        defaultRealm().transaction() {
+            println("Adding object")
+            // Add object via Array. Order must match mode property order.
+            DemoObject.createInDefaultRealmWithObject([TableViewController.randomString(), TableViewController.randomDate()])
+        }
     }
 
     // Helpers

@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 // Sortable Realm types
+// Useful for minForProperty()/maxForProperty()
 public protocol Sortable {}
 extension NSDate: Sortable {}
 extension Int16: Sortable {}
@@ -26,26 +27,34 @@ extension Int64: Sortable {}
 extension Float: Sortable {}
 extension Double: Sortable {}
 
+// Since RLMArray's should only be used as object properties, typealias to ArrayProperty
 public typealias ArrayProperty = RLMArray
 
 public extension ArrayProperty {
 
+    // Initialize empty ArrayProperty with objectClass of type T
     public convenience init<T: Object>(_: T.Type) {
-        self.init(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self)))
+        self.init(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T)))
     }
 
+    // Convert ArrayProperty to generic RealmArray version
     public func realmArray<T: Object>(_: T.Type) -> RealmArray<T> {
+        assert(RLMSwiftSupport.demangleClassName(NSStringFromClass(T)) == objectClassName,
+            "Must pass same RealmObject type to realmArray as was used to create the ArrayProperty")
         return RealmArray<T>(rlmArray: self)
     }
 }
 
 public class RealmArray<T: Object>: SequenceType, Printable {
+    // MARK: Properties
+
     var rlmArray: RLMArray
     public var count: UInt { return rlmArray.count }
     public var readOnly: Bool { return rlmArray.readOnly }
     public var realm: Realm { return Realm(rlmRealm: rlmArray.realm) }
-
     public var description: String { return rlmArray.description }
+
+    // MARK: Initializers
 
     public init() {
         rlmArray = RLMArray(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self)))
@@ -56,9 +65,11 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         self.rlmArray = rlmArray
     }
 
-    public subscript(index: UInt) -> T {
+    // MARK: Object Retrieval
+
+    public subscript(index: UInt) -> T? {
         get {
-            return rlmArray[index] as T
+            return rlmArray[index] as T?
         }
         set {
             return rlmArray[index] = newValue
@@ -73,6 +84,8 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return rlmArray.lastObject() as T?
     }
 
+    // MARK: Index Retrieval
+
     public func indexOf(object: T) -> UInt? {
         return rlmArray.indexOfObject(object)
     }
@@ -81,11 +94,11 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return rlmArray.indexOfObjectWithPredicate(predicate)
     }
 
-    // Swift query convenience functions
-
     public func indexWhere(predicateFormat: String, _ args: CVarArgType...) -> UInt {
         return rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args))
     }
+
+    // MARK: Subarray Retrieval
 
     public func objectsWhere(predicateFormat: String, _ args: CVarArgType...) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: rlmArray.objectsWhere(predicateFormat, args: getVaList(args)))
@@ -95,9 +108,13 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return RealmArray<T>(rlmArray: rlmArray.objectsWithPredicate(predicate))
     }
 
+    // MARK: Sorting
+
     public func arraySortedByProperty(property: String, ascending: Bool) -> RealmArray<T> {
         return RealmArray<T>(rlmArray: rlmArray.arraySortedByProperty(property, ascending: ascending))
     }
+
+    // MARK: Aggregate Operations
 
     public func minOfProperty<U: Sortable>(property: String) -> U {
         return rlmArray.minOfProperty(property) as U
@@ -115,9 +132,13 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         return rlmArray.averageOfProperty(property) as Double
     }
 
+    // MARK: JSON
+
     public func JSONString() -> String {
         return rlmArray.JSONString()
     }
+
+    // MARK: Sequence Support
 
     public func generate() -> GeneratorOf<T> {
         var i: UInt = 0
@@ -130,11 +151,13 @@ public class RealmArray<T: Object>: SequenceType, Printable {
         }
     }
 
-    public func add(object: T) {
+    // MARK: Mutating
+
+    public func append(object: T) {
         rlmArray.addObject(object)
     }
 
-    public func add(objects: [T]) {
+    public func append(objects: [T]) {
         rlmArray.addObjectsFromArray(objects)
     }
 
