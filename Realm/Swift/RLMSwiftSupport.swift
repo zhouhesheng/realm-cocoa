@@ -28,10 +28,56 @@ class Sample : NSObject {
     dynamic var bar = 0
 }
 
+class Generic<T> {
+    var val = 0
+}
+
+class VarLet : NSObject {
+    var foo = Generic<Int>()
+    let bar = Generic<Int>()
+}
+
+
+
+
+class Magic : NSObject { // aka Realm.Object
+}
+
+class QueryAttribute<T> {
+    let column: Int
+
+    init(type: AnyClass, propertyName: String) {
+        // map type/property name to column index plus table
+        column = 0
+    }
+
+    // has overloaded operators for query building
+}
+
+func Attribute<T: Magic, U>(x: T.Type, f: (T) -> U) -> QueryAttribute<U> {
+    var propName: NSString? = ""
+    f(RLMCreateAccessorRecorder(T.self as Magic.Type, nil, &propName) as T)
+    return QueryAttribute(type: x, propertyName: propName!)
+}
+
+
+class Employee : Magic {
+    var name = ""
+    var age = 10
+}
+
+struct EmployeeProperties {
+    static let name = Attribute(Employee.self) { $0.name }
+    static let age = Attribute(Employee.self) { $0.age }
+}
+
+
 class Observer : NSObject {
     var sample = Sample()
 
     func test() {
+        var b2 = Attribute(Employee.self) { $0.age }
+
         sample.addObserver(self, forKeyPath: "bar", options: nil, context: nil)
         sample.bar = 5
 
@@ -42,6 +88,10 @@ class Observer : NSObject {
     override func observeValueForKeyPath(keyPath: String!, ofObject object: AnyObject!, change: [NSObject : AnyObject]!, context: UnsafeMutablePointer<()>) {
         NSLog("change: \(change)")
     }
+}
+
+func stuff(var f : Sample -> Int) {
+    NSLog("stuff")
 }
 
 @objc public class RLMSwiftSupport {
@@ -59,11 +109,19 @@ class Observer : NSObject {
 
 
 
-        let obj = Model()
+        let obj = VarLet()
         dump(obj)
         let ref = reflect(obj)
         for i in 0..<ref.count {
-            NSLog("\(ref[i].0) \(ref[i].1.objectIdentifier) \(ref[i].1.count)")
+            let f = ref[i]
+            NSLog("\(f.0) \(f.1.disposition) \(f.1.count)")
+            for i in 0..<f.1.count {
+                let ff = f.1[i]
+                NSLog("- \(ff.0) \(ff.1.disposition) \(ff.1.count)")
+            }
+
+            NSLog("get: \(obj.respondsToSelector(NSSelectorFromString(f.0)))")
+            NSLog("set: \(obj.respondsToSelector(NSSelectorFromString(RLMGetSetterName(f.0))))")
         }
 
         var propertiesCount : CUnsignedInt = 0

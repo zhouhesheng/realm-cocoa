@@ -20,6 +20,8 @@
 #import <Realm/RLMConstants.h>
 #import <Realm/RLMObject.h>
 
+NSString *RLMGetSetterName(NSString *getter);
+
 /**
  This class models properties persisted to Realm in an RLMObjectSchema.
  

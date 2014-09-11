@@ -21,6 +21,12 @@
 #import "RLMProperty.h"
 #import "RLMObject.h"
 
+#import <objc/runtime.h>
+
+NSString *RLMGetSetterName(NSString *getter);
+
+id RLMCreateAccessorRecorder(Class cls, RLMObjectSchema *schema, NSString **lastPropertyAccessed);
+
 @interface RLMRealm ()
 + (void)clearRealmCache;
 @end

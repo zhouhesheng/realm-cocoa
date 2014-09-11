@@ -19,4 +19,27 @@
 #include <stdio.h>
 #import <Foundation/Foundation.h>
 
+#import <Realm/Realm.h>
+
 NSString *const RLMRealmDidChangeNotification = @"RLMRealmDidChangeNotification";
+
+@class RLMObjectSchema;
+
+id RLMCreateAccessorRecorder(Class cls, __unused RLMObjectSchema *schema, NSString **lastPropertyAccessed) {
+    NSString *name = [[cls className] stringByAppendingString:@"_rlmQueryThing"];
+    Class impl = objc_lookUpClass(name.UTF8String);
+    if (!impl) {
+        impl = objc_allocateClassPair(cls, name.UTF8String, 0);
+
+        // loop over object schema and make accessors of the correct type
+        IMP imp = imp_implementationWithBlock(^{
+            *lastPropertyAccessed = @"name";
+            return nil;
+        });
+        class_replaceMethod(impl, NSSelectorFromString(@"name"), imp, "@:");
+
+        objc_registerClassPair(impl);
+    }
+
+    return [[impl alloc] init];
+}

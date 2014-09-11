@@ -58,6 +58,14 @@
     return prop;
 }
 
+NSString *RLMGetSetterName(NSString *getter) {
+    int asciiCode = [getter characterAtIndex:0];
+    BOOL shouldUppercase = asciiCode > 'A' && asciiCode < 'z';
+    NSString *firstChar = [getter substringToIndex:1];
+    firstChar = shouldUppercase ? firstChar.uppercaseString : firstChar;
+    return [NSString stringWithFormat:@"set%@%@:", firstChar, [getter substringFromIndex:1]];
+}
+
 -(void)updateAccessorNames {
     // populate getter/setter names if generic
     if (!_getterName) {
