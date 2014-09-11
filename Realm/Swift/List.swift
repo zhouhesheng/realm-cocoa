@@ -16,24 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-// Since RLMArray's should only be used as object properties, typealias to ArrayProperty
-public typealias ArrayProperty = RLMArray
-
-public extension ArrayProperty {
-
-    // Initialize empty ArrayProperty with objectClass of type T
-    public convenience init<T: Object>(_: T.Type) {
-        self.init(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T)))
-    }
-
-    // Convert ArrayProperty to generic List version
-    public func list<T: Object>(_: T.Type) -> List<T> {
-        assert(RLMSwiftSupport.demangleClassName(NSStringFromClass(T)) == objectClassName,
-            "Must pass same Object type to list() as was used to create the ArrayProperty")
-        return List<T>(rlmArray: self)
-    }
-}
-
 public enum MinMaxResult {
     case i16(Int16)
     case i32(Int32)
@@ -43,11 +25,18 @@ public enum MinMaxResult {
     case date(NSDate)
 }
 
-public class List<T: Object>: SequenceType, Printable {
+@objc public class ListBase {
+    // FIXME: should not stay public
+    public var rlmArray: RLMArray
+
+    init(_ array: RLMArray) {
+        rlmArray = array
+    }
+}
+
+public class List<T: Object>: ListBase, SequenceType, Printable {
     // MARK: Properties
 
-    // FIXME: temporarily public for array properties
-    public var rlmArray: RLMArray
     public var count: UInt { return rlmArray.count }
     public var realm: Realm { return Realm(rlmRealm: rlmArray.realm) }
     public var description: String { return rlmArray.description }
@@ -55,13 +44,12 @@ public class List<T: Object>: SequenceType, Printable {
 
     // MARK: Initializers
 
-    public init() {
-        rlmArray = RLMArray(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self)))
+    convenience public init() {
+        self.init(RLMArray(objectClassName: RLMSwiftSupport.demangleClassName(NSStringFromClass(T.self))))
     }
 
-    convenience init(rlmArray: RLMArray) {
-        self.init()
-        self.rlmArray = rlmArray
+    public override init(_ rlmArray: RLMArray) {
+        super.init(rlmArray)
     }
 
     // MARK: Index Retrieval
@@ -104,17 +92,17 @@ public class List<T: Object>: SequenceType, Printable {
     // MARK: Subarray Retrieval
 
     public func filter(predicateFormat: String, _ args: CVarArgType...) -> List<T> {
-        return List<T>(rlmArray: rlmArray.objectsWhere(predicateFormat, args: getVaList(args)))
+        return List<T>(rlmArray.objectsWhere(predicateFormat, args: getVaList(args)))
     }
 
     public func filter(predicate: NSPredicate) -> List<T> {
-        return List<T>(rlmArray: rlmArray.objectsWithPredicate(predicate))
+        return List<T>(rlmArray.objectsWithPredicate(predicate))
     }
 
     // MARK: Sorting
 
     public func sorted(property: String, ascending: Bool) -> List<T> {
-        return List<T>(rlmArray: rlmArray.arraySortedByProperty(property, ascending: ascending))
+        return List<T>(rlmArray.arraySortedByProperty(property, ascending: ascending))
     }
 
     // MARK: Aggregate Operations

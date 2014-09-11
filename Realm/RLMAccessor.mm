@@ -557,6 +557,10 @@ static Class RLMCreateAccessorClass(Class objectClass,
     for (unsigned int propNum = 0; propNum < schema.properties.count; propNum++) {
         RLMProperty *prop = schema.properties[propNum];
         char accessorCode = accessorCodeForType(prop.objcType, prop.type);
+        if (!accessorCode) {
+            continue;
+        }
+
         if (getterGetter) {
             SEL getterSel = NSSelectorFromString(prop.getterName);
             IMP getterImp = getterGetter(prop, accessorCode, prop.objectClassName);
@@ -656,9 +660,14 @@ void RLMDynamicSet(__unsafe_unretained RLMObject *obj, __unsafe_unretained RLMPr
             RLMSetValue(obj, col, val);
             break;
         default:
-            @throw [NSException exceptionWithName:@"RLMException"
-                                           reason:@"Invalid accessor code"
-                                         userInfo:nil];
+            if ([val isKindOfClass:[RLMArray class]]) {
+                RLMSetValue(obj, col, (RLMArray *)val, tryUpdate);
+            }
+            else {
+                @throw [NSException exceptionWithName:@"RLMException"
+                                               reason:@"Invalid accessor code"
+                                             userInfo:nil];
+            }
     }
 }
 

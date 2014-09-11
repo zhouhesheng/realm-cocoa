@@ -33,6 +33,11 @@
                attributeList:(objc_property_attribute_t *)attrs
               attributeCount:(unsigned int)attrCount;
 
+- (instancetype)initWithName:(NSString *)name
+                  attributes:(RLMPropertyAttributes)attributes
+             containingClass:(Class)cls
+             objectClassName:(NSString *)objectType;
+
 @end
 
 @interface RLMObjectSchema ()

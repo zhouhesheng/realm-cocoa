@@ -167,6 +167,31 @@
 
 - (instancetype)initWithName:(NSString *)name
                   attributes:(RLMPropertyAttributes)attributes
+             containingClass:(Class)cls
+             objectClassName:(NSString *)objectClassName
+{
+    self = [super init];
+    if (!self) {
+        return self;
+    }
+
+    if (class_getSuperclass([RLMSchema classForString:objectClassName]) != RLMObject.class) {
+        @throw [NSException exceptionWithName:@"RLMException"
+                                       reason:[NSString stringWithFormat:@"RLMArray sub-type '%@' must descend from RLMObject", self.objectClassName]
+                                     userInfo:nil];
+    }
+
+    _name = name;
+    _attributes = attributes;
+    _type = RLMPropertyTypeArray;
+    _objectClassName = objectClassName;
+    _ivar = class_getInstanceVariable(cls, _name.UTF8String);
+
+    return self;
+}
+
+- (instancetype)initWithName:(NSString *)name
+                  attributes:(RLMPropertyAttributes)attributes
                attributeList:(objc_property_attribute_t *)attrs
               attributeCount:(unsigned int)attrCount
 {

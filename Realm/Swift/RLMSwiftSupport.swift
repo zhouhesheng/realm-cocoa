@@ -49,7 +49,17 @@ import Foundation
                 continue
             }
 
-            let objcType = objcTypeForSwiftType(propertyName, mirror: reflection[i].1)
+            let mirror = reflection[i].1
+            if mirror.valueType is RealmArrayBase.Type {
+                let prop = RLMProperty(name: propertyName,
+                    attributes: aClass.attributesForProperty(propertyName),
+                    containingClass: aClass,
+                    objectClassName: (mirror.value as RealmArrayBase).rlmArray.objectClassName)
+                properties.append(prop)
+                continue;
+            }
+
+            let objcType = objcTypeForSwiftType(propertyName, mirror: mirror)
             let objcTypeStr = objcType.cStringUsingEncoding(NSUTF8StringEncoding)
             let attrType = "T".cStringUsingEncoding(NSUTF8StringEncoding)
             var attr = objc_property_attribute_t(name: attrType!, value: objcTypeStr!)
@@ -92,6 +102,8 @@ import Foundation
             return "@\"\(NSStringFromClass(objectType.self))\""
         case is RLMArray.Type:
             return "@\"RLMArray<\((mirror.value as RLMArray).objectClassName)>\""
+        case is RealmArrayBase.Type:
+            return "@\"RealmArray<\((mirror.value as RealmArrayBase).rlmArray.objectClassName)>\""
         default:
             println("Can't persist property '\(name)' with incompatible type.\nAdd to ignoredPropertyNames: method to ignore.")
             abort()

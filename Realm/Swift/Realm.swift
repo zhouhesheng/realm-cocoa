@@ -25,7 +25,7 @@ public func migrateRealm(path: String = defaultRealmPath(), block: MigrationBloc
 // MARK: Object Retrieval
 
 public func objects<T: Object>(type: T.Type) -> List<T> {
-    return List<T>(rlmArray: T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
+    return List<T>(T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
 }
 
 // MARK: Default Realm Helpers
@@ -127,7 +127,7 @@ public class Realm {
     // MARK: Object Retrieval
 
     public func objects<T: Object>(type: T.Type) -> List<T> {
-        return List<T>(rlmArray: T.self.allObjectsInRealm(rlmRealm))
+        return List<T>(T.self.allObjectsInRealm(rlmRealm))
     }
 }
 
