@@ -43,15 +43,15 @@ public func migrateRealm(path: String, block: MigrationBlock) {
 // MARK: Object Retrieval
 
 public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
-    return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
+    return RealmArray<T>(T.self.allObjectsInRealm(RLMRealm.defaultRealm()))
 }
 
 public func objects<T: Object>(type: T.Type, filter: String, args: CVarArgType...) -> RealmArray<T> {
-    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), `where`: filter, args: getVaList(args)))
+    return RealmArray<T>(T.self.objectsInRealm(RLMRealm.defaultRealm(), `where`: filter, args: getVaList(args)))
 }
 
 public func objects<T: Object>(type: T.Type, filter: NSPredicate) -> RealmArray<T> {
-    return RealmArray<T>(rlmArray: T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: filter))
+    return RealmArray<T>(T.self.objectsInRealm(RLMRealm.defaultRealm(), withPredicate: filter))
 }
 
 // MARK: Default Realm Helpers
@@ -147,14 +147,14 @@ public class Realm {
     // MARK: Object Retrieval
 
     public func objects<T: Object>(type: T.Type) -> RealmArray<T> {
-        return RealmArray<T>(rlmArray: T.self.allObjectsInRealm(rlmRealm))
+        return RealmArray<T>(T.self.allObjectsInRealm(rlmRealm))
     }
 
     public func objects<T: Object>(type: T.Type, _ predicateFormat: String, _ args: CVarArgType...) -> RealmArray<T> {
-        return RealmArray<T>(rlmArray: T.self.objectsInRealm(rlmRealm, `where`: predicateFormat, args: getVaList(args)))
+        return RealmArray<T>(T.self.objectsInRealm(rlmRealm, `where`: predicateFormat, args: getVaList(args)))
     }
 
     public func objects<T: Object>(type: T.Type, withPredicate predicate: NSPredicate) -> RealmArray<T> {
-        return RealmArray<T>(rlmArray: T.self.objectsInRealm(rlmRealm, withPredicate: predicate))
+        return RealmArray<T>(T.self.objectsInRealm(rlmRealm, withPredicate: predicate))
     }
 }

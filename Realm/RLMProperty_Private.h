@@ -27,12 +27,19 @@
                attributeList:(objc_property_attribute_t *)attrs
               attributeCount:(unsigned int)attrCount;
 
+- (instancetype)initWithName:(NSString *)name
+                  attributes:(RLMPropertyAttributes)attributes
+             containingClass:(Class)cls
+             objectClassName:(Class)objectType;
+
 // private setters
 @property (nonatomic, assign) NSUInteger column;
 @property (nonatomic, readwrite, assign) RLMPropertyType type;
 
 // private properties
 @property (nonatomic, assign) char objcType;
+// ivar reference for Swift array propertiegls
+@property (nonatomic) Ivar ivar;
 
 // getter and setter names
 @property (nonatomic, copy) NSString *getterName;

@@ -25,6 +25,8 @@
 #import "RLMQueryUtil.hpp"
 #import "RLMUtil.hpp"
 
+#import <Realm/Realm-Swift.h>
+
 #import <objc/runtime.h>
 
 static void RLMVerifyAndAlignColumns(RLMObjectSchema *tableSchema, RLMObjectSchema *objectSchema) {
@@ -293,7 +295,11 @@ void RLMAddObjectToRealm(RLMObject *object, RLMRealm *realm, bool update) {
     for (RLMProperty *prop in schema.properties) {
         // get object from ivar using key value coding
         id value = nil;
-        if ([object respondsToSelector:NSSelectorFromString(prop.getterName)]) {
+        if (prop.ivar) {
+            RealmArrayBase *array = object_getIvar(object, prop.ivar);
+            value = array.rlmArray;
+        }
+        else if ([object respondsToSelector:NSSelectorFromString(prop.getterName)]) {
             value = [object valueForKey:prop.getterName];
         }
 
@@ -314,6 +320,17 @@ void RLMAddObjectToRealm(RLMObject *object, RLMRealm *realm, bool update) {
 
     // switch class to use table backed accessor
     object_setClass(object, schema.accessorClass);
+
+    for (RLMProperty *prop in schema.properties) {
+        if (prop.type != RLMPropertyTypeArray || !prop.ivar) {
+            continue;
+        }
+
+        RealmArrayBase *array = object_getIvar(object, prop.ivar);
+        array.rlmArray = [RLMArrayLinkView arrayWithObjectClassName:array.rlmArray.objectClassName
+                                                               view:object->_row.get_linklist(prop.column)
+                                                              realm:realm];
+    }
 }
 
 

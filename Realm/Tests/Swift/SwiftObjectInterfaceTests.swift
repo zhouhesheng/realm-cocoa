@@ -23,6 +23,18 @@ import TestFramework
 class SwiftObjectInterfaceTests: SwiftTestCase {
 
     // Swift models
+    func testStuff() {
+        let realm = realmWithTestPath()
+        let co = SwiftCompanyObject()
+
+        realm.transactionWithBlock {
+            realm.addObject(co)
+
+            co.employees.append(SwiftEmployeeObject())
+        }
+
+        XCTAssertEqual(1, SwiftEmployeeObject.allObjectsInRealm(realm).count)
+    }
 
     func testSwiftObject() {
         let realm = realmWithTestPath()

@@ -85,7 +85,7 @@ class SwiftEmployeeObject: RLMObject {
 }
 
 class SwiftCompanyObject: RLMObject {
-    dynamic var employees = RLMArray(objectClassName: SwiftEmployeeObject.className())
+    let employees = RealmArray<SwiftEmployeeObject>()
 }
 
 class SwiftArrayPropertyObject: RLMObject {
