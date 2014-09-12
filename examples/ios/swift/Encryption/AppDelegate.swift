@@ -47,7 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         // Save your object
-        realm.transaction() {
+        realm.write {
             let obj = StringObject()
             obj.stringProp = "abcd"
             realm.add(obj)

@@ -39,8 +39,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
         self.window!.rootViewController = UIViewController()
         self.window!.makeKeyAndVisible()
+        let rootVC = UIViewController()
+        self.window!.rootViewController = rootVC
 
-        NSFileManager.defaultManager().removeItemAtPath(RLMRealm.defaultRealmPath(), error: nil)
+        NSFileManager.defaultManager().removeItemAtPath(defaultRealmPath(), error: nil)
 
         // Create a standalone object
         var mydog = Dog()
@@ -54,15 +56,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let realm = defaultRealm() // Create realm pointing to default file
 
         // Save your object
-        realm.transaction() {
-            realm.add(mydog)
-        }
+        realm.write { realm.add(mydog) }
 
         // Query
-        var results = objects(Dog.self, "name contains 'x'")
+        var results = objects(Dog).filter("name contains 'x'")
 
         // Queries are chainable!
-        var results2 = results.objectsWhere("age > 8")
+        var results2 = results.filter("age > 8")
         println("Number of dogs: \(results2.count)")
 
         // Link objects
@@ -70,14 +70,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         person.name = "Tim"
         person.dogs.addObject(mydog)
 
-        realm.transaction() {
-            realm.add(person)
-        }
+        realm.write { realm.add(person) }
 
         // Multi-threading
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            var otherResults = objects(Dog.self, "name contains 'Rex'")
+            var otherResults = objects(Dog).filter("name contains 'Rex'")
             println("Number of dogs \(otherResults.count)")
+        }
+
         return true
     }
 }
