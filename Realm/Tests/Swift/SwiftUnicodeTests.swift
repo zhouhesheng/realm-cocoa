@@ -28,24 +28,24 @@ class SwiftUnicodeTests: SwiftTestCase {
 
     func testUTF8StringContents() {
         let realm = realmWithTestPath()
-        realm.beginWriteTransaction()
+        realm.beginWrite()
         SwiftStringObject.createInRealm(realm, withObject: [utf8TestString])
-        realm.commitWriteTransaction()
+        realm.commitWrite()
 
-        let obj1 = SwiftStringObject.allObjectsInRealm(realm).firstObject() as SwiftStringObject
+        let obj1 = realm.objects(SwiftStringObject).first()!
         XCTAssertEqual(obj1.stringCol, utf8TestString, "Storing and retrieving a string with UTF8 content should work")
 
-        let obj2 = SwiftStringObject.objectsInRealm(realm, "stringCol == %@", utf8TestString).firstObject() as SwiftStringObject
+        let obj2 = objects(SwiftStringObject).filter("stringCol == %@", utf8TestString).first()!
         XCTAssertTrue(obj1.isEqualToObject(obj2), "Querying a realm searching for a string with UTF8 content should work")
     }
 
     func testUTF8PropertyWithUTF8StringContents() {
         let realm = realmWithTestPath()
-        realm.beginWriteTransaction()
+        realm.beginWrite()
         SwiftUTF8Object.createInRealm(realm, withObject: [utf8TestString])
-        realm.commitWriteTransaction()
+        realm.commitWrite()
 
-        let obj1 = SwiftUTF8Object.allObjectsInRealm(realm).firstObject() as SwiftUTF8Object
+        let obj1 = realm.objects(SwiftUTF8Object).first()!
         XCTAssertEqual(obj1.柱колоéнǢкƱаم👍, utf8TestString, "Storing and retrieving a string with UTF8 content should work")
 
         // Test fails because of rdar://17735684
@@ -57,24 +57,24 @@ class SwiftUnicodeTests: SwiftTestCase {
 
     func testUTF8StringContents_objc() {
         let realm = realmWithTestPath()
-        realm.beginWriteTransaction()
+        realm.beginWrite()
         StringObject.createInRealm(realm, withObject: [utf8TestString])
-        realm.commitWriteTransaction()
+        realm.commitWrite()
 
-        let obj1 = StringObject.allObjectsInRealm(realm).firstObject() as StringObject
+        let obj1 = realm.objects(StringObject).first()!
         XCTAssertEqual(obj1.stringCol, utf8TestString, "Storing and retrieving a string with UTF8 content should work")
 
-        let obj2 = StringObject.objectsInRealm(realm, "stringCol == %@", utf8TestString).firstObject() as StringObject
+        let obj2 = objects(StringObject).filter("stringCol == %@", utf8TestString).first()!
         XCTAssertTrue(obj1.isEqualToObject(obj2), "Querying a realm searching for a string with UTF8 content should work")
     }
 
     func testUTF8PropertyWithUTF8StringContents_objc() {
         let realm = realmWithTestPath()
-        realm.beginWriteTransaction()
+        realm.beginWrite()
         UTF8Object.createInRealm(realm, withObject: [utf8TestString])
-        realm.commitWriteTransaction()
+        realm.commitWrite()
 
-        let obj1 = UTF8Object.allObjectsInRealm(realm).firstObject() as UTF8Object
+        let obj1 = realm.objects(UTF8Object).first()!
         XCTAssertEqual(obj1.柱колоéнǢкƱаم, utf8TestString, "Storing and retrieving a string with UTF8 content should work")
 
         // Test fails because of rdar://17735684

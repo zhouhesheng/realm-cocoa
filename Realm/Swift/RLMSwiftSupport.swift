@@ -25,7 +25,11 @@ import Foundation
     }
 
     public class func demangleClassName(className: NSString) -> NSString {
-        return className.substringFromIndex(className.rangeOfString(".").location + 1)
+        let loc = className.rangeOfString(".").location
+        if loc == NSNotFound {
+            return className
+        }
+        return className.substringFromIndex(loc + 1)
     }
 
     public class func propertiesForClass(aClass: AnyClass) -> [RLMProperty] {

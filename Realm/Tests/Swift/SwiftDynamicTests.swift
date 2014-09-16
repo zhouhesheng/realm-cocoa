@@ -164,10 +164,10 @@ class SwiftDynamicTests: SwiftTestCase {
         autoreleasepool {
             // open realm in autoreleasepool to create tables and then dispose
             let realm = self.realmWithTestPath()
-            realm.beginWriteTransaction()
+            realm.beginWrite()
             AllTypesObject.createInRealm(realm, withObject: obj1)
             AllTypesObject.createInRealm(realm, withObject: obj2)
-            realm.commitWriteTransaction()
+            realm.commitWrite()
         }
 
         // verify properties

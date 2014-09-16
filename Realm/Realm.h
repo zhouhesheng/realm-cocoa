@@ -27,6 +27,4 @@
 
 // WARNING: For private use only (imported for Swift support)
 // TODO: Move header from Public to Project once rdar://17633863 is fixed
-#if REALM_SWIFT
 #import <Realm/Realm-Bridging-Header.h>
-#endif

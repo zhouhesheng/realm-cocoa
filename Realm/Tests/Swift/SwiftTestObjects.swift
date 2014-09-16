@@ -39,7 +39,7 @@ class SwiftObject: RLMObject {
     dynamic var binaryCol = "a".dataUsingEncoding(NSUTF8StringEncoding)
     dynamic var dateCol = NSDate(timeIntervalSince1970: 1)
     dynamic var objectCol = SwiftBoolObject()
-    dynamic var arrayCol = RLMArray(objectClassName: SwiftBoolObject.className())
+    dynamic var arrayCol = ArrayProperty(SwiftBoolObject)
 }
 
 class SwiftOptionalObject: RLMObject {
@@ -85,13 +85,13 @@ class SwiftEmployeeObject: RLMObject {
 }
 
 class SwiftCompanyObject: RLMObject {
-    dynamic var employees = RLMArray(objectClassName: SwiftEmployeeObject.className())
+    dynamic var employees = ArrayProperty(SwiftEmployeeObject)
 }
 
 class SwiftArrayPropertyObject: RLMObject {
     dynamic var name = ""
-    dynamic var array = RLMArray(objectClassName: SwiftStringObject.className())
-    dynamic var intArray = RLMArray(objectClassName: SwiftIntObject.className())
+    dynamic var array = ArrayProperty(SwiftStringObject)
+    dynamic var intArray = ArrayProperty(SwiftIntObject)
 }
 
 class SwiftDynamicObject: RLMObject {
@@ -107,7 +107,7 @@ class SwiftIgnoredPropertiesObject: RLMObject {
     dynamic var name = ""
     dynamic var age = 0
     dynamic var runtimeProperty: AnyObject?
-    
+
     override class func ignoredProperties() -> [AnyObject]! {
         return ["runtimeProperty"]
     }

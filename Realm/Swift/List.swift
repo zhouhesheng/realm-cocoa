@@ -34,13 +34,24 @@ public extension ArrayProperty {
     }
 }
 
+public enum MinMaxResult {
+    case i16(Int16)
+    case i32(Int32)
+    case i64(Int64)
+    case float(Float)
+    case double(Double)
+    case date(NSDate)
+}
+
 public class List<T: Object>: SequenceType, Printable {
     // MARK: Properties
 
-    var rlmArray: RLMArray
+    // FIXME: temporarily public for array properties
+    public var rlmArray: RLMArray
     public var count: UInt { return rlmArray.count }
     public var realm: Realm { return Realm(rlmRealm: rlmArray.realm) }
     public var description: String { return rlmArray.description }
+    public var readOnly: Bool { return rlmArray.readOnly }
 
     // MARK: Initializers
 
@@ -56,15 +67,19 @@ public class List<T: Object>: SequenceType, Printable {
     // MARK: Index Retrieval
 
     public func indexOf(object: T) -> UInt? {
-        return rlmArray.indexOfObject(object)
+        return indexToOptional(rlmArray.indexOfObject(object))
     }
 
     public func indexOf(predicate: NSPredicate) -> UInt? {
-        return rlmArray.indexOfObjectWithPredicate(predicate)
+        return indexToOptional(rlmArray.indexOfObjectWithPredicate(predicate))
     }
 
     public func indexOf(predicateFormat: String, _ args: CVarArgType...) -> UInt? {
-        return rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args))
+        return indexToOptional(rlmArray.indexOfObjectWhere(predicateFormat, args: getVaList(args)))
+    }
+
+    private func indexToOptional(index: UInt) -> UInt? {
+        return index == UInt(NSNotFound) ? nil : index
     }
 
     // MARK: Object Retrieval
@@ -104,12 +119,14 @@ public class List<T: Object>: SequenceType, Printable {
 
     // MARK: Aggregate Operations
 
-    public func min<U: Sortable>(property: String) -> U {
-        return rlmArray.minOfProperty(property) as U
+    public func min(property: String) -> MinMaxResult {
+        // FIXME: implement correct type mapping
+        return MinMaxResult.i32((rlmArray.minOfProperty(property) as NSNumber).intValue)
     }
 
-    public func max<U: Sortable>(property: String) -> U {
-        return rlmArray.maxOfProperty(property) as U
+    public func max(property: String) -> MinMaxResult {
+        // FIXME: implement correct type mapping
+        return MinMaxResult.i32((rlmArray.maxOfProperty(property) as NSNumber).intValue)
     }
 
     public func sum(property: String) -> Double {
