@@ -27,13 +27,12 @@ class SwiftObjectInterfaceTests: SwiftTestCase {
         let realm = realmWithTestPath()
         let co = SwiftCompanyObject()
 
-        realm.transactionWithBlock {
-            realm.addObject(co)
-
+        realm.write {
+            realm.add(co)
             co.employees.append(SwiftEmployeeObject())
         }
 
-        XCTAssertEqual(1, SwiftEmployeeObject.allObjectsInRealm(realm).count)
+        XCTAssertEqual(1, realm.objects(SwiftEmployeeObject).count)
     }
 
     func testSwiftObject() {
@@ -52,7 +51,7 @@ class SwiftObjectInterfaceTests: SwiftTestCase {
         obj.dateCol = NSDate(timeIntervalSince1970: 123)
         obj.objectCol = SwiftBoolObject()
         obj.objectCol.boolCol = true
-        obj.arrayCol.addObject(obj.objectCol)
+        obj.arrayCol.append(obj.objectCol)
         realm.commitWrite()
 
         let firstObj = realm.objects(SwiftObject).first()!
@@ -65,7 +64,7 @@ class SwiftObjectInterfaceTests: SwiftTestCase {
         XCTAssertEqual(firstObj.dateCol, NSDate(timeIntervalSince1970: 123), "should be epoch + 123")
         XCTAssertEqual(firstObj.objectCol.boolCol, true, "should be true")
         XCTAssertEqual(obj.arrayCol.count, 1, "array count should be 1")
-        XCTAssertEqual((obj.arrayCol.firstObject() as? SwiftBoolObject)!.boolCol, true, "should be true")
+        XCTAssertEqual(obj.arrayCol.first()!.boolCol, true, "should be true")
     }
 
     func testDefaultValueSwiftObject() {
@@ -119,52 +118,5 @@ class SwiftObjectInterfaceTests: SwiftTestCase {
 
     func testSwiftClassNameIsDemangled() {
         XCTAssertEqual(SwiftObject.className()!, "SwiftObject", "Calling className() on Swift class should return demangled name")
-    }
-
-    // Objective-C models
-
-    // Note: Swift doesn't support custom accessor names
-    // so we test to make sure models with custom accessors can still be accessed
-    func testCustomAccessors() {
-        let realm = realmWithTestPath()
-        realm.beginWrite()
-        let ca = CustomAccessorsObject.createInRealm(realm, withObject: ["name", 2])
-        XCTAssertEqual(ca.name!, "name", "name property should be name.")
-        ca.age = 99
-        XCTAssertEqual(ca.age, 99, "age property should be 99")
-        realm.commitWrite()
-    }
-
-    func testClassExtension() {
-        let realm = realmWithTestPath()
-
-        realm.beginWrite()
-        let bObject = BaseClassStringObject()
-        bObject.intCol = 1
-        bObject.stringCol = "stringVal"
-        realm.add(bObject)
-        realm.commitWrite()
-
-        let objectFromRealm = realm.objects(BaseClassStringObject).first()!
-        XCTAssertEqual(objectFromRealm.intCol, 1, "Should be 1")
-        XCTAssertEqual(objectFromRealm.stringCol!, "stringVal", "Should be stringVal")
-    }
-
-    func testCreateOrUpdate() {
-        let realm = defaultRealm()
-        realm.beginWrite()
-        SwiftPrimaryStringObject.createOrUpdateInDefaultRealmWithObject(["string", 1])
-        let objects = SwiftPrimaryStringObject.allObjects();
-        XCTAssertEqual(objects.count, 1, "Should have 1 object");
-        XCTAssertEqual((objects[0] as SwiftPrimaryStringObject).intCol, 1, "Value should be 1");
-
-        SwiftPrimaryStringObject.createOrUpdateInDefaultRealmWithObject(["stringCol": "string2", "intCol": 2])
-        XCTAssertEqual(objects.count, 2, "Should have 2 objects")
-
-        SwiftPrimaryStringObject.createOrUpdateInDefaultRealmWithObject(["string", 3])
-        XCTAssertEqual(objects.count, 2, "Should have 2 objects")
-        XCTAssertEqual((objects[0] as SwiftPrimaryStringObject).intCol, 3, "Value should be 3");
-
-        realm.commitWrite()
     }
 }
