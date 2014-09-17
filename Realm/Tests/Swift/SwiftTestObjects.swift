@@ -39,7 +39,7 @@ class SwiftObject: RLMObject {
     dynamic var binaryCol = "a".dataUsingEncoding(NSUTF8StringEncoding)
     dynamic var dateCol = NSDate(timeIntervalSince1970: 1)
     dynamic var objectCol = SwiftBoolObject()
-    dynamic var arrayCol = List<SwiftBoolObject>()
+    var arrayCol = List<SwiftBoolObject>()
 }
 
 class SwiftOptionalObject: RLMObject {
@@ -90,8 +90,8 @@ class SwiftCompanyObject: RLMObject {
 
 class SwiftArrayPropertyObject: RLMObject {
     dynamic var name = ""
-    dynamic var array = List<SwiftStringObject>()
-    dynamic var intArray = List<SwiftIntObject>()
+    var array = List<SwiftStringObject>()
+    var intArray = List<SwiftIntObject>()
 }
 
 class SwiftDynamicObject: RLMObject {

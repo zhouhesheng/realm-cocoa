@@ -37,13 +37,13 @@ class SwiftArrayPropertyTests: SwiftTestCase {
 
         let array = SwiftArrayPropertyObject()
         array.name = "arrayObject"
-        array.array.addObject(string)
+        array.array.add(string)
         XCTAssertEqual(array.array.count, 1)
         XCTAssertEqual((array.array.firstObject() as SwiftStringObject).stringCol, "string")
 
         realm.beginWrite()
         realm.add(array)
-        array.array.addObject(string)
+        array.array.add(string)
         realm.commitWrite()
 
         let arrayObjects = realm.objects(SwiftArrayPropertyObject)
@@ -63,9 +63,9 @@ class SwiftArrayPropertyTests: SwiftTestCase {
 
         let obj = SwiftStringObject()
         obj.stringCol = "a"
-        array.array.addObject(obj)
-        array.array.addObject(SwiftStringObject.createInRealm(realm, withObject: ["b"]))
-        array.array.addObject(obj)
+        array.array.add(obj)
+        array.array.add(SwiftStringObject.createInRealm(realm, withObject: ["b"]))
+        array.array.add(obj)
         realm.commitWrite()
 
         XCTAssertEqual(array.array.count, 3, "Should have three elements in array")
@@ -89,8 +89,8 @@ class SwiftArrayPropertyTests: SwiftTestCase {
         let obj = SwiftStringObject()
         obj.stringCol = "a"
         let array = arObj.array
-        array.addObject(obj)
-        array.addObject(SwiftStringObject.createInRealm(realm, withObject: ["b"]))
+        array.add(obj)
+        array.add(SwiftStringObject.createInRealm(realm, withObject: ["b"]))
         realm.commitWrite()
 
         XCTAssertEqual(array.count, 2, "Should have two elements in array")
@@ -107,7 +107,7 @@ class SwiftArrayPropertyTests: SwiftTestCase {
         let child1 = SwiftStringObject.createInRealm(realm, withObject: ["a"])
         let child2 = SwiftStringObject()
         child2.stringCol = "b"
-        obj.array.addObjectsFromArray([child2, child1])
+        obj.array.addsFromArray([child2, child1])
         realm.commitWrite()
 
         let children = realm.objects(SwiftStringObject)
@@ -152,7 +152,7 @@ class SwiftArrayPropertyTests: SwiftTestCase {
 
         let array = ArrayPropertyObject()
         array.name = "arrayObject"
-        array.array.addObject(string)
+        array.array.add(string)
 
         realm.beginWrite()
         realm.add(array)
@@ -175,9 +175,9 @@ class SwiftArrayPropertyTests: SwiftTestCase {
 
         let obj = StringObject()
         obj.stringCol = "a"
-        array.array.addObject(obj)
-        array.array.addObject(StringObject.createInRealm(realm, withObject: ["b"]))
-        array.array.addObject(obj)
+        array.array.add(obj)
+        array.array.add(StringObject.createInRealm(realm, withObject: ["b"]))
+        array.array.add(obj)
         realm.commitWrite()
 
         XCTAssertEqual(array.array.count, 3, "Should have three elements in array")
@@ -202,8 +202,8 @@ class SwiftArrayPropertyTests: SwiftTestCase {
         let obj = StringObject()
         obj.stringCol = "a"
         let array = arObj.array
-        array.addObject(obj)
-        array.addObject(StringObject.createInRealm(realm, withObject: ["b"]))
+        array.add(obj)
+        array.add(StringObject.createInRealm(realm, withObject: ["b"]))
         realm.commitWrite()
 
         XCTAssertEqual(array.count, 2, "Should have two elements in array")
@@ -220,7 +220,7 @@ class SwiftArrayPropertyTests: SwiftTestCase {
         let child1 = StringObject.createInRealm(realm, withObject: ["a"])
         let child2 = StringObject()
         child2.stringCol = "b"
-        obj.array.addObjectsFromArray([child2, child1])
+        obj.array.addsFromArray([child2, child1])
         realm.commitWrite()
 
         let children = realm.objects(StringObject)
@@ -237,8 +237,8 @@ class SwiftArrayPropertyTests: SwiftTestCase {
 
         let obj = StringObject()
         obj.stringCol = "a"
-        array.array.addObject(obj)
-        array.array.addObject(obj)
+        array.array.add(obj)
+        array.array.add(obj)
 
         realm.beginWrite()
         realm.add(array)

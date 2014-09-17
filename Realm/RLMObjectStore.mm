@@ -296,7 +296,7 @@ void RLMAddObjectToRealm(RLMObject *object, RLMRealm *realm, bool update) {
         // get object from ivar using key value coding
         id value = nil;
         if (prop.ivar) {
-            RealmArrayBase *array = object_getIvar(object, prop.ivar);
+            ListBase *array = object_getIvar(object, prop.ivar);
             value = array.rlmArray;
         }
         else if ([object respondsToSelector:NSSelectorFromString(prop.getterName)]) {
@@ -326,7 +326,7 @@ void RLMAddObjectToRealm(RLMObject *object, RLMRealm *realm, bool update) {
             continue;
         }
 
-        RealmArrayBase *array = object_getIvar(object, prop.ivar);
+        ListBase *array = object_getIvar(object, prop.ivar);
         array.rlmArray = [RLMArrayLinkView arrayWithObjectClassName:array.rlmArray.objectClassName
                                                                view:object->_row.get_linklist(prop.column)
                                                               realm:realm];

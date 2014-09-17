@@ -221,7 +221,8 @@ class SwiftArrayTests: SwiftTestCase {
 
         let company = SwiftCompanyObject()
         realm.add(company)
-        company.employees = realm.objects(SwiftEmployeeObject).rlmArray
+        // FIXME: implement +=
+//        company.employees += realm.objects(SwiftEmployeeObject)
 
         realm.commitWrite()
 
@@ -229,31 +230,31 @@ class SwiftArrayTests: SwiftTestCase {
         XCTAssertEqual(peopleInCompany.count, 3, "No links should have been deleted")
 
         realm.beginWrite()
-        peopleInCompany.removeObjectAtIndex(1) // Should delete link to employee
+        peopleInCompany.remove(1) // Should delete link to employee
         realm.commitWrite()
 
         XCTAssertEqual(peopleInCompany.count, 2, "link deleted when accessing via links")
 
-        var test = peopleInCompany[0] as SwiftEmployeeObject
+        var test = peopleInCompany[0]!
         XCTAssertEqual(test.age, po1.age, "Should be equal")
         XCTAssertEqual(test.name, po1.name, "Should be equal")
         XCTAssertEqual(test.hired, po1.hired, "Should be equal")
         // XCTAssertEqual(test, po1, "Should be equal") //FIXME, should work. Asana : https://app.asana.com/0/861870036984/13123030433568
 
-        test = peopleInCompany[1] as SwiftEmployeeObject
+        test = peopleInCompany[1]!
         XCTAssertEqual(test.age, po3.age, "Should be equal")
         XCTAssertEqual(test.name, po3.name, "Should be equal")
         XCTAssertEqual(test.hired, po3.hired, "Should be equal")
         // XCTAssertEqual(test, po3, "Should be equal") //FIXME, should work. Asana : https://app.asana.com/0/861870036984/13123030433568
 
         realm.beginWrite()
-        peopleInCompany.removeLastObject()
+        peopleInCompany.removeLast()
         XCTAssertEqual(peopleInCompany.count, 1, "1 remaining link")
-        peopleInCompany.replaceObjectAtIndex(0, withObject: po2)
+        peopleInCompany.replace(0, object: po2)
         XCTAssertEqual(peopleInCompany.count, 1, "1 link replaced")
-        peopleInCompany.insertObject(po1, atIndex: 0)
+        peopleInCompany.insert(po1, atIndex: 0)
         XCTAssertEqual(peopleInCompany.count, 2, "2 links")
-        peopleInCompany.removeAllObjects()
+        peopleInCompany.removeAll()
         XCTAssertEqual(peopleInCompany.count, 0, "0 remaining links")
         realm.commitWrite()
     }
