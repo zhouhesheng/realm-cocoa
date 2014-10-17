@@ -75,6 +75,6 @@ void RLMRealmSetPrimaryKeyForObjectClass(RLMRealm *realm, NSString *objectClass,
 +(instancetype)dynamicSchemaFromRealm:(RLMRealm *)realm;
 
 // class for string
-+ (Class)classForString:(NSString *)className;
++ (Class)classForString:(NSString *)className inScope:(id)containingObject;
 
 @end

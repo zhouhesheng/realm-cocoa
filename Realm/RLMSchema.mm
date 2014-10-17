@@ -96,6 +96,7 @@ static NSMutableDictionary *s_localNameToClass;
             }
 
             NSString *className = NSStringFromClass(cls);
+            NSLog(@"%@", className);
             if ([RLMSwiftSupport isSwiftClassName:className]) {
                 s_localNameToClass[[RLMSwiftSupport demangleClassName:className]] = cls;
             }
@@ -204,11 +205,15 @@ void RLMRealmSetPrimaryKeyForObjectClass(RLMRealm *realm, NSString *objectClass,
 }
 
 
-+ (Class)classForString:(NSString *)className {
++ (Class)classForString:(NSString *)className inScope:(id)containingObject {
     if (Class cls = s_localNameToClass[className]) {
         return cls;
     }
-    return NSClassFromString(className);
+    if (containingObject) {
+        NSString *context = [RLMSwiftSupport demangleClassName:[containingObject className]];
+        return s_localNameToClass[[NSString stringWithFormat:@"%@.%@", context, className]];
+    }
+    return nil;
 }
 
 - (id)copyWithZone:(NSZone *)zone {

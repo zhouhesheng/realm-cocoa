@@ -19,6 +19,21 @@
 import XCTest
 import Realm
 
+class SwiftNestedObject: RLMObject {
+    class ChildClass: RLMObject {
+        dynamic var value = 0
+
+    }
+
+    dynamic var child: ChildClass? = ChildClass()
+    dynamic var childArray = RLMArray(objectClassName: "ChildClass")
+}
+
+class SwiftNestedObjectLinker: RLMObject {
+    dynamic var child: SwiftNestedObject.ChildClass? = SwiftNestedObject.ChildClass()
+    dynamic var childArray = RLMArray(objectClassName: "SwiftNestedObject.ChildClass")
+}
+
 class SwiftObjectInterfaceTests: SwiftTestCase {
 
     // Swift models
@@ -135,6 +150,26 @@ class SwiftObjectInterfaceTests: SwiftTestCase {
         XCTAssertEqual(objects.count, 2, "Should have 2 objects")
         XCTAssertEqual((objects[0] as SwiftPrimaryStringObject).intCol, 3, "Value should be 3");
 
+        realm.commitWriteTransaction()
+    }
+
+    func testNestedClasses() {
+        let realm = realmWithTestPath()
+        realm.beginWriteTransaction()
+
+        let childObj = SwiftNestedObject.ChildClass.createInRealm(realm, withObject: [5])
+
+        let parent = SwiftNestedObject.createInRealm(realm, withObject: [childObj, [childObj]])
+        parent.child = nil
+        parent.child = childObj
+        parent.childArray.removeAllObjects()
+        parent.childArray.addObject(childObj)
+
+        let other = SwiftNestedObjectLinker.createInRealm(realm, withObject: [childObj, [childObj]])
+        other.child = nil
+        other.child = childObj
+        other.childArray.removeAllObjects()
+        other.childArray.addObject(childObj)
         realm.commitWriteTransaction()
     }
 }

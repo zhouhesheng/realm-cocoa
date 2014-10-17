@@ -25,11 +25,48 @@
 
 @implementation RLMSwiftSupport
 
+// NSStringFromClass demangles names for top-level classes, but not for nested
+// classes. The format for Swift class names is:
+// _TtCC9iOS_Tests17SwiftNestedObject10ChildClass
+// _T indicates it is a Swift symbol, t indicates that the symbol is a type, C
+// is repeated once for each class in the name, 9 is the length of the module
+// name, iOS_Tests is the module name, and then there is a repeated sequence of class
+// name length followed by the class name for each class in the nesting
 + (BOOL)isSwiftClassName:(NSString *)className {
-    return [className rangeOfString:@"."].location != NSNotFound;
+    // because top-level classes are demangled, there will always be at least
+    // two Cs
+    return [className containsString:@"."] || [className hasPrefix:@"_TtCC"];
 }
 
 + (NSString *)demangleClassName:(NSString *)className {
-    return [className substringFromIndex:[className rangeOfString:@"."].location + 1];
+    NSUInteger dot = [className rangeOfString:@"."].location;
+    if (dot != NSNotFound) {
+        // drop module name from pre-demangled name
+        return [className substringFromIndex:dot + 1];
+    }
+
+    const char *str = className.UTF8String + 3; // skip _Tt
+    while (*str == 'C') { // skip Cs
+        ++str;
+    }
+
+    // Skip module name
+    long len = strtol(str, (char **)&str, 10);
+    str += len;
+
+    // Read the class names
+    // Doesn't convert punycode for Unicode class names
+    NSMutableString *demanged = [NSMutableString stringWithCapacity:strlen(str)];
+    while (*str) {
+        if (demanged.length) {
+            [demanged appendString:@"."];
+        }
+
+        long len = strtol(str, (char **)&str, 10);
+        [demanged appendString:[[NSString alloc] initWithBytesNoCopy:(void *)str length:len encoding:NSUTF8StringEncoding freeWhenDone:NO]];
+        str += len;
+    }
+
+    return demanged;
 }
 @end

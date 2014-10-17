@@ -87,7 +87,7 @@
 }
 
 // determine RLMPropertyType from objc code - returns true if valid type was found/set
--(BOOL)setTypeFromRawType {
+-(BOOL)setTypeFromRawType:(RLMObject *)instance {
     const char *code = _objcRawType.UTF8String;
     _objcType = *code;    // first char of type attr
 
@@ -148,7 +148,7 @@
                 NSString *className = [_objcRawType substringWithRange:NSMakeRange(2, _objcRawType.length-3)];
 
                 // verify type
-                Class cls = [RLMSchema classForString:className];
+                Class cls = [RLMSchema classForString:className inScope:instance];
                 if (!RLMIsSubclass(cls, RLMObject.class)) {
                     @throw [NSException exceptionWithName:@"RLMException"
                                                    reason:[NSString stringWithFormat:@"'%@' is not supported as an RLMObject property. All properties must be primitives, NSString, NSDate, NSData, RLMArray, or subclasses of RLMObject. See http://realm.io/docs/cocoa/latest/api/Classes/RLMObject.html for more information.", self.objectClassName]
@@ -220,7 +220,7 @@
         _objcRawType = [NSString stringWithFormat:@"@\"RLMArray<%@>\"", [[obj valueForKey:_name] objectClassName]];
     }
 
-    if (![self setTypeFromRawType]) {
+    if (![self setTypeFromRawType:obj]) {
         NSString *reason = [NSString stringWithFormat:@"Can't persist property '%@' with incompatible type. "
                             "Add to ignoredPropertyNames: method to ignore.", self.name];
         @throw [NSException exceptionWithName:@"RLMException" reason:reason userInfo:nil];
@@ -255,7 +255,7 @@
         return nil;
     }
 
-    if (![self setTypeFromRawType]) {
+    if (![self setTypeFromRawType:nil]) {
         NSString *reason = [NSString stringWithFormat:@"Can't persist property '%@' with incompatible type. "
                              "Add to ignoredPropertyNames: method to ignore.", self.name];
         @throw [NSException exceptionWithName:@"RLMException" reason:reason userInfo:nil];
