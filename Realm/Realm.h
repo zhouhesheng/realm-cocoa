@@ -25,6 +25,6 @@
 #import <Realm/RLMRealm.h>
 #import <Realm/RLMResults.h>
 #import <Realm/RLMSchema.h>
+
+// Stuff for the legacy Swift interface; do not use from obj-c
 #import <Realm/RLMSwiftHelpers.h>
-#import <Realm/RLMListBase.h>
-#import <Realm/RLMObjectStore.hpp>

@@ -16,8 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-import Realm
-
 public class Object : RLMObjectBase, Equatable {
     // Get the names of all properties in the object which are of type List<>
     public class func getGenericListPropertyNames(obj: AnyObject) -> NSArray {

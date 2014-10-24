@@ -16,8 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-import Realm
-
 // Types which can be used for min()/max()
 public protocol MinMaxType {}
 extension Double: MinMaxType {}

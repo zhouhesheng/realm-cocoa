@@ -16,9 +16,14 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-// These types don't change when wrapping in Swift
-// so we just typealias them to remove the 'RLM' prefix
-public typealias PropertyType = RLMPropertyType
-public typealias PropertyAttributes = RLMPropertyAttributes
-public typealias NotificationToken = RLMNotificationToken
-public typealias ObjectMigrationBlock = RLMObjectMigrationBlock
+#import <Foundation/Foundation.h>
+
+#import "RLMArray.h"
+#import "RLMMigration.h"
+#import "RLMObject.h"
+#import "RLMRealm.h"
+#import "RLMResults.h"
+#import "RLMSchema.h"
+#import "RLMSwiftHelpers.h"
+#import "RLMListBase.h"
+#import "RLMObjectStore.hpp"

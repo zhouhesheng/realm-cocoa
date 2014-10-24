@@ -16,8 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-import Realm
-
 // MARK: Object Retrieval
 
 public func objects<T: Object>(type: T.Type) -> Results<T> {

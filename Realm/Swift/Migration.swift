@@ -16,8 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-import Realm
-
 public typealias MigrationBlock = (migration: Migration, oldSchemaVersion: UInt) -> Void
 
 public func setSchemaVersion(schemaVersion: UInt, migrationBlock: MigrationBlock) {
