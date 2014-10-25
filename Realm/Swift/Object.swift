@@ -17,6 +17,37 @@
 ////////////////////////////////////////////////////////////////////////////
 
 public class Object : RLMObjectBase, Equatable {
+    // MARK: Public API
+
+    public var relam: Realm { return Realm(rlmRealm: RLMGetRealmFromObject(self)) }
+//    public let objectSchema { return super.objectSchema }
+//    public let deletedFromRealm { return super.isDeletedFromRealm }
+
+    public class func createInRealm(realm: Realm, withObject object: AnyObject) -> Self {
+        return unsafeBitCast(RLMCreateObjectInRealmWithValue(realm.rlmRealm, className(), object, .allZeros), self)
+    }
+
+
+
+//@property (nonatomic, readonly) RLMRealm *realm;
+//@property (nonatomic, readonly) RLMObjectSchema *objectSchema;
+//@property (nonatomic, readonly, getter = isDeletedFromRealm) BOOL deletedFromRealm;
+//
+//- (instancetype)init;
+//- (instancetype)initWithObject:(id)object;
+//
+//- (BOOL)isEqualToObject:(RLMObjectBase *)object;
+//- (NSArray *)linkingObjectsOfClass:(NSString *)className forProperty:(NSString *)property;
+//
+//+ (NSString *)className;
+//
+//+ (RLMPropertyAttributes)attributesForProperty:(NSString *)propertyName;
+//+ (NSDictionary *)defaultPropertyValues;
+//+ (NSString *)primaryKey;
+//+ (NSArray *)ignoredProperties;
+
+    // MARK: Implementation stuff
+
     // Get the names of all properties in the object which are of type List<>
     public class func getGenericListPropertyNames(obj: AnyObject) -> NSArray {
         let reflection = reflect(obj)
@@ -49,10 +80,6 @@ public class Object : RLMObjectBase, Equatable {
 
     public override init() {
         super.init()
-    }
-
-    public class func createInRealm(realm: Realm, withObject object: AnyObject) -> Self {
-        return unsafeBitCast(RLMCreateObjectInRealmWithValue(realm.rlmRealm, className(), object, .allZeros), self)
     }
 }
 

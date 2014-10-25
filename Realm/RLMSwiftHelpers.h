@@ -41,7 +41,10 @@
 
 @end
 
-@interface RLMObjectBase (Swift)
+@interface RLMObjectBase () {
+    @public
+    RLMRealm *_realm;
+}
 
 - (instancetype)initWithRealm:(RLMRealm *)realm schema:(RLMObjectSchema *)schema defaultValues:(BOOL)useDefaults;
 
@@ -49,3 +52,9 @@
 + (RLMResults *)objectsInRealm:(RLMRealm *)realm where:(NSString *)predicateFormat args:(va_list)args;
 
 @end
+
+extern "C" {
+inline RLMRealm *RLMGetRealmFromObject(RLMObjectBase *obj) {
+    return obj->_realm;
+}
+}
