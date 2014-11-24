@@ -1208,4 +1208,25 @@ RLM_ARRAY_TYPE(PrimaryIntObject);
 
 }
 
+
+#pragma mark - Date test
+
+-(void)testNegativeDate {
+    [RLMRealm.defaultRealm beginWriteTransaction];
+    [RLMRealm.defaultRealm deleteAllObjects];
+    [DateObject createInDefaultRealmWithObject:@[[NSDate dateWithTimeIntervalSince1970:10000]]];
+    [DateObject createInDefaultRealmWithObject:@[[NSDate dateWithTimeIntervalSince1970:-10000]]];
+
+    [RLMRealm.defaultRealm commitWriteTransaction];
+
+    RLMResults *result = [DateObject allObjects];
+    XCTAssertEqual((NSUInteger)2, [result count]);
+    XCTAssertEqual([NSDate dateWithTimeIntervalSince1970:10000], ((DateObject *)result[0]).dateCol);
+    XCTAssertEqual([NSDate dateWithTimeIntervalSince1970:-10000], ((DateObject *)result[1]).dateCol);
+
+    RLMResults *sorted = [[DateObject allObjects] sortedResultsUsingProperty:@"dateCol" ascending:YES];  // smallest first!
+    XCTAssertEqual([NSDate dateWithTimeIntervalSince1970:-10000], ((DateObject *)sorted[0]).dateCol);
+    XCTAssertEqual([NSDate dateWithTimeIntervalSince1970:10000], ((DateObject *)sorted[1]).dateCol);
+}
+
 @end
