@@ -438,74 +438,87 @@ void update_query_with_value_expression(RLMSchema *schema,
                             pred.options, indexes, index, value);
 }
 
-template<typename T>
-Query column_expression(NSComparisonPredicateOptions operatorType,
-                                            NSUInteger leftColumn,
-                                            NSUInteger rightColumn,
-                                            Table *table) {
-    switch (operatorType) {
-        case NSEqualToPredicateOperatorType:
-            return table->column<T>(leftColumn) == table->column<T>(rightColumn);
-        case NSNotEqualToPredicateOperatorType:
-            return table->column<T>(leftColumn) != table->column<T>(rightColumn);
-        case NSLessThanPredicateOperatorType:
-            return table->column<T>(leftColumn) < table->column<T>(rightColumn);
-        case NSGreaterThanPredicateOperatorType:
-            return table->column<T>(leftColumn) > table->column<T>(rightColumn);
-        case NSLessThanOrEqualToPredicateOperatorType:
-            return table->column<T>(leftColumn) <= table->column<T>(rightColumn);
-        case NSGreaterThanOrEqualToPredicateOperatorType:
-            return table->column<T>(leftColumn) >= table->column<T>(rightColumn);
+// base case for the variadic recursion
+template<typename Func>
+Query do_staticify_types(Func&& f) {
+    return f();
+}
+
+// Invoke the passed functions with values of the types given by the
+// RLMPropertyTypes passed. Generates static versions of f for each combination
+// of types, then picks which one to actually invoke at runtime.
+template<typename Func, typename... Args>
+Query do_staticify_types(Func&& f, RLMPropertyType type, Args... rest) {
+    auto bind_type = [&](auto argType) {
+        return do_staticify_types([&](auto... args) { return f(argType, args...); }, rest...);
+    };
+
+    switch (type) {
+        case type_Bool:
+            return bind_type(Bool());
+        case type_Int:
+            return bind_type(Int());
+        case type_Float:
+            return bind_type(Float());
+        case type_Double:
+            return bind_type(Double());
+        case type_DateTime:
+            return bind_type(int64_t());
         default:
-            @throw RLMPredicateException(@"Unsupported operator", @"Only ==, !=, <, <=, >, and >= are supported comparison operators");
+            @throw @"";
+//            @throw RLMPredicateException(RLMUnsupportedTypesFoundInPropertyComparisonException,
+//                                         RLMUnsupportedTypesFoundInPropertyComparisonReason,
+//                                         RLMTypeToString(leftType),
+//                                         RLMTypeToString(rightType));
     }
 }
 
-void update_query_with_column_expression(RLMObjectSchema *scheme, Query &query, NSString *leftColumnName, NSString *rightColumnName, NSComparisonPredicateOptions predicateOptions)
+template<typename Func>
+Query staticify_types(RLMPropertyType left, RLMPropertyType right, Func&& f) {
+    return do_staticify_types(f, left, right);
+}
+
+void update_query_with_column_expression(RLMSchema *schema,
+                                         RLMObjectSchema *objectSchema,
+                                         Query &query,
+                                         NSComparisonPredicate *pred)
 {
-    // Validate object types
-    NSUInteger leftIndex = RLMValidatedColumnIndex(scheme, leftColumnName);
-    RLMPropertyType leftType = [scheme[leftColumnName] type];
-    RLMPrecondition(leftType != RLMPropertyTypeArray, @"Invalid predicate",
-                    @"RLMArray predicates must contain the ANY modifier");
+    bool isAny = pred.comparisonPredicateModifier == NSAnyPredicateModifier;
+    std::vector<NSUInteger> leftIndexes;
+    RLMProperty *leftProp = get_property_from_key_path(schema, objectSchema, pred.leftExpression.keyPath, leftIndexes, isAny);
+    std::vector<NSUInteger> rightIndexes;
+    RLMProperty *rightProp = get_property_from_key_path(schema, objectSchema, pred.rightExpression.keyPath, rightIndexes, isAny);
 
-    NSUInteger rightIndex = RLMValidatedColumnIndex(scheme, rightColumnName);
-    RLMPropertyType rightType = [scheme[rightColumnName] type];
-    RLMPrecondition(rightType != RLMPropertyTypeArray, @"Invalid predicate",
-                    @"RLMArray predicates must contain the ANY modifier");
+    query.and_query(staticify_types(leftProp.type, rightProp.type, [&](auto left, auto right) {
+        auto column = [&](auto valueType, RLMProperty *prop, std::vector<NSUInteger> const& indices) {
+            tightdb::TableRef& tbl = query.get_table();
+            for (NSUInteger col : indices) {
+                tbl->link(col); // mutates m_link_chain on table
+            }
+            return tbl->column<decltype(valueType)>(prop.column);
+        };
+        auto compare = [&](auto cmp) {
+            return cmp(column(left, leftProp, leftIndexes), column(right, rightProp, rightIndexes));
+        };
 
-    // NOTE: It's assumed that column type must match and no automatic type conversion is supported.
-    RLMPrecondition(leftType == rightType,
-                    RLMPropertiesComparisonTypeMismatchException,
-                    RLMPropertiesComparisonTypeMismatchReason,
-                    RLMTypeToString(leftType),
-                    RLMTypeToString(rightType));
-
-    // TODO: Should we handle special case where left row is the same as right row (tautology)
-    switch (leftType) {
-        case type_Bool:
-            query.and_query(column_expression<Bool>(predicateOptions, leftIndex, rightIndex, &(*query.get_table())));
-            break;
-        case type_Int:
-            query.and_query(column_expression<Int>(predicateOptions, leftIndex, rightIndex, &(*query.get_table())));
-            break;
-        case type_Float:
-            query.and_query(column_expression<Float>(predicateOptions, leftIndex, rightIndex, &(*query.get_table())));
-            break;
-        case type_Double:
-            query.and_query(column_expression<Double>(predicateOptions, leftIndex, rightIndex, &(*query.get_table())));
-            break;
-        case type_DateTime:
-            // FIXME: int64_t should be DateTime but that doesn't work on 32 bit
-            // FIXME: as time_t(32bit) != time_t(64bit)
-            query.and_query(column_expression<int64_t>(predicateOptions, leftIndex, rightIndex, &(*query.get_table())));
-            break;
-        default:
-            @throw RLMPredicateException(RLMUnsupportedTypesFoundInPropertyComparisonException,
-                                         RLMUnsupportedTypesFoundInPropertyComparisonReason,
-                                         RLMTypeToString(leftType),
-                                         RLMTypeToString(rightType));
-    }
+        switch (pred.predicateOperatorType) {
+            case NSEqualToPredicateOperatorType:
+                return compare(std::equal_to<>());
+            case NSNotEqualToPredicateOperatorType:
+                return compare(std::not_equal_to<>());
+            case NSLessThanPredicateOperatorType:
+                return compare(std::less<>());
+            case NSGreaterThanPredicateOperatorType:
+                return compare(std::greater<>());
+            case NSLessThanOrEqualToPredicateOperatorType:
+                return compare(std::less_equal<>());
+            case NSGreaterThanOrEqualToPredicateOperatorType:
+                return compare(std::greater_equal<>());
+            default:
+                @throw RLMPredicateException(@"Unsupported operator",
+                                             @"Only ==, !=, <, <=, >, and >= are supported comparison operators");
+        }
+    }));
 }
 
 void update_query_with_predicate(NSPredicate *predicate, RLMSchema *schema,
@@ -574,8 +587,7 @@ void update_query_with_predicate(NSPredicate *predicate, RLMSchema *schema,
 
         if (exp1Type == NSKeyPathExpressionType && exp2Type == NSKeyPathExpressionType) {
             // both expression are KeyPaths
-            update_query_with_column_expression(objectSchema, query, compp.leftExpression.keyPath, compp.rightExpression.keyPath,
-                                                compp.predicateOperatorType);
+            update_query_with_column_expression(schema, objectSchema, query, compp);
         }
         else if (exp1Type == NSKeyPathExpressionType && exp2Type == NSConstantValueExpressionType) {
             // comparing keypath to value
