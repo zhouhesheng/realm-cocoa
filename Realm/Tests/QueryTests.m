@@ -1651,4 +1651,58 @@
     XCTAssertEqualObjects(@"Joe", [[querySort lastObject] name]);
 }
 
+// FIXME: support for SELF in IN and CONTAINS queries againsts RLMRealm and RLMArray
+
+//- (void)testSelfInArrayQuery {
+//    RLMRealm *realm = [RLMRealm defaultRealm];
+//
+//    [realm beginWriteTransaction];
+//    EmployeeObject *employee = [EmployeeObject createInRealm:realm withObject:@{@"name": @"John", @"age": @30, @"hired": @NO}];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"Jill",  @"age": @40, @"hired": @YES}];
+//    CompanyObject *company = [CompanyObject createInRealm:realm withObject:@{@"name" : @"Company", @"employees" : @[employee]}];
+//    [realm commitWriteTransaction];
+//
+//    RLMResults *results = [EmployeeObject objectsInRealm:realm where:@"NOT (self IN %@)", company.employees];
+//    XCTAssertEqualObjects([results.lastObject name], @"Jill");
+//}
+//
+//- (void)testSelfInResultsQuery {
+//    RLMRealm *realm = [RLMRealm defaultRealm];
+//
+//    [realm beginWriteTransaction];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"John", @"age": @30, @"hired": @NO}];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"Jill",  @"age": @40, @"hired": @YES}];
+//    [realm commitWriteTransaction];
+//
+//    RLMResults *initialResults = [EmployeeObject objectsInRealm:realm where:@"age > 35"];
+//    RLMResults *results = [EmployeeObject objectsInRealm:realm where:@"NOT (self IN %@)", initialResults];
+//    XCTAssertEqualObjects([results.lastObject name], @"Jill");
+//}
+//
+//- (void)testArrayContainsSelfQuery {
+//    RLMRealm *realm = [RLMRealm defaultRealm];
+//
+//    [realm beginWriteTransaction];
+//    EmployeeObject *employee = [EmployeeObject createInRealm:realm withObject:@{@"name": @"John", @"age": @30, @"hired": @NO}];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"Jill",  @"age": @40, @"hired": @YES}];
+//    CompanyObject *company = [CompanyObject createInRealm:realm withObject:@{@"name" : @"Company", @"employees" : @[employee]}];
+//    [realm commitWriteTransaction];
+//
+//    RLMResults *results = [EmployeeObject objectsInRealm:realm where:@"NOT (%@ CONTAINS self)", company.employees];
+//    XCTAssertEqualObjects([results.lastObject name], @"Jill");
+//}
+//
+//- (void)testResultsContainsSelfQuery {
+//    RLMRealm *realm = [RLMRealm defaultRealm];
+//
+//    [realm beginWriteTransaction];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"John", @"age": @30, @"hired": @NO}];
+//    [EmployeeObject createInRealm:realm withObject:@{@"name": @"Jill",  @"age": @40, @"hired": @YES}];
+//    [realm commitWriteTransaction];
+//
+//    RLMResults *initialResults = [EmployeeObject objectsInRealm:realm where:@"age > 35"];
+//    RLMResults *results = [EmployeeObject objectsInRealm:realm where:@"NOT (%@ CONTAINS self)", initialResults];
+//    XCTAssertEqualObjects([results.lastObject name], @"Jill");
+//}
+
 @end
