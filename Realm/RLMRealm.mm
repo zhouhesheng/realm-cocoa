@@ -58,16 +58,14 @@
 // A weak holder for an RLMRealm to allow calling performSelector:onThread: without
 // a strong reference to the realm
 @interface RLMWeakNotifier : NSObject
-@property (nonatomic, weak) RLMRealm *realm;
-
-- (instancetype)initWithRealm:(RLMRealm *)realm;
-- (void)notify;
+- (instancetype)initWithRealm:(RLMRealm *)realm sharedGroup:(SharedGroup *)sharedGroup thread:(NSThread *)thread;
+- (void)waitForChanges;
+- (void)shutdown;
 @end
 
 using namespace std;
 using namespace tightdb;
 using namespace tightdb::util;
-
 
 // create NSException from c++ exception
 static __attribute__((noreturn)) void throw_objc_exception(exception &ex) {
@@ -244,6 +242,8 @@ NSString * const c_defaultRealmFileName = @"default.realm";
 
     std::unique_ptr<Replication> _replication;
     std::unique_ptr<SharedGroup> _sharedGroup;
+
+    RLMWeakNotifier *_notifier;
 
     // Used for read-only realms
     std::unique_ptr<Group> _readGroup;
@@ -515,6 +515,16 @@ static id RLMAutorelease(id value) {
         cacheRealm(realm, path);
     }
 
+    if (!readonly) {
+        RLMWeakNotifier *notifier = [[RLMWeakNotifier alloc] initWithRealm:realm
+                                                               sharedGroup:realm->_sharedGroup.get()
+                                                                    thread:realm->_thread];
+        realm->_notifier = notifier;
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+            [notifier waitForChanges];
+        });
+    }
+
     return RLMAutorelease(realm);
 }
 
@@ -631,16 +641,6 @@ static void CheckReadWrite(RLMRealm *realm, NSString *msg=@"Cannot write to a re
             // update state and make all objects in this realm read-only
             _inWriteTransaction = NO;
 
-            // notify other realm instances of changes
-            NSArray *realms = realmsAtPath(_path);
-            for (RLMRealm *realm in realms) {
-                if (![realm isEqual:self]) {
-                    RLMWeakNotifier *notifier = [[RLMWeakNotifier alloc] initWithRealm:realm];
-                    [notifier performSelector:@selector(notify)
-                                     onThread:realm->_thread withObject:nil waitUntilDone:NO];
-                }
-            }
-
             // send local notification
             [self sendNotifications:RLMRealmDidChangeNotification];
         }
@@ -705,6 +705,7 @@ static void CheckReadWrite(RLMRealm *realm, NSString *msg=@"Cannot write to a re
               "pending changes have been rolled back. Make sure to retain a reference to the "
               "RLMRealm for the duration of the write transaction.");
     }
+    [_notifier shutdown];
 }
 
 - (void)handleExternalCommit {
@@ -946,18 +947,43 @@ static void CheckReadWrite(RLMRealm *realm, NSString *msg=@"Cannot write to a re
 
 @end
 
-@implementation RLMWeakNotifier
-- (instancetype)initWithRealm:(RLMRealm *)realm
-{
+@implementation RLMWeakNotifier {
+    __weak RLMRealm *_realm;
+    tightdb::SharedGroup *_sharedGroup;
+    NSThread *_thread;
+
+    std::atomic<bool> _shutdownFlag;
+    std::atomic<bool> _done;
+}
+
+- (instancetype)initWithRealm:(RLMRealm *)realm sharedGroup:(SharedGroup *)sharedGroup thread:(NSThread *)thread {
     self = [super init];
     if (self) {
         _realm = realm;
+        _sharedGroup = sharedGroup;
+        _thread = thread;
+        _shutdownFlag.store(false);
+        _done.store(false);
     }
     return self;
 }
 
-- (void)notify
-{
+- (void)notify {
     [_realm handleExternalCommit];
+}
+
+- (void)waitForChanges {
+    while (!_shutdownFlag.load() && _sharedGroup->wait_for_change()) {
+        [self performSelector:@selector(notify)
+                     onThread:_thread withObject:nil waitUntilDone:NO];
+    }
+    _done.store(true);
+}
+
+- (void)shutdown {
+    _shutdownFlag.store(true);
+    while (!_done.load()) {
+        _sharedGroup->wait_for_change_release();
+    }
 }
 @end
