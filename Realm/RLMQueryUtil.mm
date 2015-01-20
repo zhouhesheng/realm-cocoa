@@ -440,20 +440,24 @@ void update_query_with_value_expression(RLMSchema *schema,
 
 // base case for the variadic recursion
 template<typename Func>
-Query do_staticify_types(Func&& f) {
+Query get_columns(Func&& f, tightdb::Table *) {
     return f();
 }
 
-// Invoke the passed functions with values of the types given by the
-// RLMPropertyTypes passed. Generates static versions of f for each combination
-// of types, then picks which one to actually invoke at runtime.
 template<typename Func, typename... Args>
-Query do_staticify_types(Func&& f, RLMPropertyType type, Args... rest) {
+Query get_columns(Func&& f, tightdb::Table *table, std::vector<NSUInteger> const& indices, RLMProperty *prop, Args... rest) {
     auto bind_type = [&](auto argType) {
-        return do_staticify_types([&](auto... args) { return f(argType, args...); }, rest...);
+        auto column = [&] {
+            for (NSUInteger col : indices) {
+                table->link(col); // mutates m_link_chain on table
+            }
+            return table->column<decltype(argType)>(prop.column);
+        };
+
+        return get_columns([&](auto... args) { return f(column(), args...); }, table, rest...);
     };
 
-    switch (type) {
+    switch (prop.type) {
         case type_Bool:
             return bind_type(Bool());
         case type_Int:
@@ -464,6 +468,8 @@ Query do_staticify_types(Func&& f, RLMPropertyType type, Args... rest) {
             return bind_type(Double());
         case type_DateTime:
             return bind_type(int64_t());
+        case type_Link:
+            return bind_type(Link());
         default:
             @throw @"";
 //            @throw RLMPredicateException(RLMUnsupportedTypesFoundInPropertyComparisonException,
@@ -473,9 +479,14 @@ Query do_staticify_types(Func&& f, RLMPropertyType type, Args... rest) {
     }
 }
 
-template<typename Func>
-Query staticify_types(RLMPropertyType left, RLMPropertyType right, Func&& f) {
-    return do_staticify_types(f, left, right);
+template<typename Arg1, typename Arg2, typename Func>
+auto call_if_valid(Arg1&& a1, Arg2&& a2, Func&& f) -> decltype(f(a1, a2), Query()) {
+    return f(a1, a2);
+}
+
+template<typename... Args>
+Query call_if_valid(Args&&...) {
+    throw "bad";
 }
 
 void update_query_with_column_expression(RLMSchema *schema,
@@ -489,36 +500,27 @@ void update_query_with_column_expression(RLMSchema *schema,
     std::vector<NSUInteger> rightIndexes;
     RLMProperty *rightProp = get_property_from_key_path(schema, objectSchema, pred.rightExpression.keyPath, rightIndexes, isAny);
 
-    query.and_query(staticify_types(leftProp.type, rightProp.type, [&](auto left, auto right) {
-        auto column = [&](auto valueType, RLMProperty *prop, std::vector<NSUInteger> const& indices) {
-            tightdb::TableRef& tbl = query.get_table();
-            for (NSUInteger col : indices) {
-                tbl->link(col); // mutates m_link_chain on table
-            }
-            return tbl->column<decltype(valueType)>(prop.column);
-        };
-        auto compare = [&](auto cmp) {
-            return cmp(column(left, leftProp, leftIndexes), column(right, rightProp, rightIndexes));
-        };
-
+    auto comp = [&](auto left, auto right) {
         switch (pred.predicateOperatorType) {
             case NSEqualToPredicateOperatorType:
-                return compare(std::equal_to<>());
-            case NSNotEqualToPredicateOperatorType:
-                return compare(std::not_equal_to<>());
-            case NSLessThanPredicateOperatorType:
-                return compare(std::less<>());
-            case NSGreaterThanPredicateOperatorType:
-                return compare(std::greater<>());
-            case NSLessThanOrEqualToPredicateOperatorType:
-                return compare(std::less_equal<>());
-            case NSGreaterThanOrEqualToPredicateOperatorType:
-                return compare(std::greater_equal<>());
+                return call_if_valid(left, right, std::equal_to<>());
+//            case NSNotEqualToPredicateOperatorType:
+//                return left != right;
+//            case NSLessThanPredicateOperatorType:
+//                return left < right;
+//            case NSGreaterThanPredicateOperatorType:
+//                return left > right;
+//            case NSLessThanOrEqualToPredicateOperatorType:
+//                return left <= right;
+//            case NSGreaterThanOrEqualToPredicateOperatorType:
+//                return left >= right;
             default:
                 @throw RLMPredicateException(@"Unsupported operator",
                                              @"Only ==, !=, <, <=, >, and >= are supported comparison operators");
         }
-    }));
+    };
+
+    query.and_query(get_columns(comp, query.get_table().get(), leftIndexes, leftProp, rightIndexes, rightProp));
 }
 
 void update_query_with_predicate(NSPredicate *predicate, RLMSchema *schema,
