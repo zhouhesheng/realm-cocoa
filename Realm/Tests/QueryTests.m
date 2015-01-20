@@ -60,6 +60,8 @@
 @property (nonatomic, assign) float     float2;
 @property (nonatomic, assign) double    double1;
 @property (nonatomic, assign) double    double2;
+@property (nonatomic, strong) IntObject *link1;
+@property (nonatomic, strong) IntObject *link2;
 @end
 
 @implementation QueryObject
@@ -919,99 +921,52 @@
     XCTAssertEqual(2U, [QueryLinkObject objectsWhere:@"query.float1 <= query.int2"].count);
 }
 
-#if 0
-- (void)testTwoColumnComparison
+- (void)testLinkColumnComparison
 {
     RLMRealm *realm = [RLMRealm defaultRealm];
 
     [realm beginWriteTransaction];
-
-    [QueryObject createInRealm:realm withObject:@[@YES, @YES, @1, @2, @23.0f, @1.7f,  @0.0,  @5.55, @"Instance 0"]];
-    [QueryObject createInRealm:realm withObject:@[@YES, @NO,  @1, @3, @-5.3f, @4.21f, @1.0,  @4.44, @"Instance 1"]];
-    [QueryObject createInRealm:realm withObject:@[@NO,  @NO,  @2, @2, @1.0f,  @3.55f, @99.9, @6.66, @"Instance 2"]];
-    [QueryObject createInRealm:realm withObject:@[@NO,  @YES, @3, @6, @4.21f, @1.0f,  @1.0,  @7.77, @"Instance 3"]];
-    [QueryObject createInRealm:realm withObject:@[@YES, @YES, @4, @5, @23.0f, @23.0f, @7.4,  @8.88, @"Instance 4"]];
-    [QueryObject createInRealm:realm withObject:@[@YES, @NO,  @15, @8, @1.0f,  @66.0f, @1.01, @9.99, @"Instance 5"]];
-    [QueryObject createInRealm:realm withObject:@[@NO,  @YES, @15, @15, @1.0f,  @66.0f, @1.01, @9.99, @"Instance 6"]];
-
-    for (QueryObject *queryObject in QueryObject.allObjects) {
-        [QueryLinkObject createInRealm:realm withObject:@[queryObject]];
-    }
-
+    IntObject *io1 = [IntObject createInRealm:realm withObject:@[@0]];
+    IntObject *io2 = [IntObject createInRealm:realm withObject:@[@1]];
+    // orders are reversed so that querying the wrong table doesn't work by coincidence
+    QueryObject *qo1 = [QueryObject createInRealm:realm withObject:@{@"link1": io2, @"link2": io2}];
+    QueryObject *qo2 = [QueryObject createInRealm:realm withObject:@{@"link1": io2, @"link2": io1}];
+    QueryObject *qo3 = [QueryObject createInRealm:realm withObject:@{@"link1": io1, @"link2": io2}];
+    [QueryLinkObject createInRealm:realm withObject:@{@"link1": io1, @"link2": io2, @"query": qo3}];
+    [QueryLinkObject createInRealm:realm withObject:@{@"link1": io2, @"link2": io1, @"query": qo2}];
+    [QueryLinkObject createInRealm:realm withObject:@{@"link1": io2, @"link2": io2, @"query": qo1}];
     [realm commitWriteTransaction];
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"bool1 == bool1"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"bool1 == bool2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"bool1 != bool2"].count);
+    // local <-> local
+    XCTAssertEqual(3U, [QueryObject objectsWhere:@"link1 == link1"].count);
+    XCTAssertEqual(0U, [QueryObject objectsWhere:@"link1 != link1"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"int1 == int1"].count);
-    XCTAssertEqual(2U, [QueryObject objectsWhere:@"int1 == int2"].count);
-    XCTAssertEqual(5U, [QueryObject objectsWhere:@"int1 != int2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"int1 > int2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"int1 < int2"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"int1 >= int2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"int1 <= int2"].count);
+    XCTAssertEqual(1U, [QueryObject objectsWhere:@"link1 == link2"].count);
+    XCTAssertEqual(2U, [QueryObject objectsWhere:@"link1 != link2"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"float1 == float1"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"float1 == float2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"float1 != float2"].count);
-    XCTAssertEqual(2U, [QueryObject objectsWhere:@"float1 > float2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"float1 < float2"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"float1 >= float2"].count);
-    XCTAssertEqual(5U, [QueryObject objectsWhere:@"float1 <= float2"].count);
+    // link <-> local
+    XCTAssertEqual(3U, [QueryLinkObject objectsWhere:@"query.link1 == link1"].count);
+    XCTAssertEqual(0U, [QueryLinkObject objectsWhere:@"query.link1 != link1"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"double1 == double1"].count);
-    XCTAssertEqual(0U, [QueryObject objectsWhere:@"double1 == double2"].count);
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"double1 != double2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"double1 > double2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"double1 < double2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"double1 >= double2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"double1 <= double2"].count);
+    XCTAssertEqual(1U, [QueryLinkObject objectsWhere:@"query.link1 == link2"].count);
+    XCTAssertEqual(2U, [QueryLinkObject objectsWhere:@"query.link1 != link2"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"query.bool1 == query.bool1"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"query.bool1 == query.bool2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"query.bool1 != query.bool2"].count);
+    // local <-> link
+    XCTAssertEqual(3U, [QueryLinkObject objectsWhere:@"link1 == query.link1"].count);
+    XCTAssertEqual(0U, [QueryLinkObject objectsWhere:@"link1 != query.link1"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"query.int1 == query.int1"].count);
-    XCTAssertEqual(2U, [QueryObject objectsWhere:@"query.int1 == query.int2"].count);
-    XCTAssertEqual(5U, [QueryObject objectsWhere:@"query.int1 != query.int2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"query.int1 > query.int2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"query.int1 < query.int2"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"query.int1 >= query.int2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"query.int1 <= query.int2"].count);
+    XCTAssertEqual(1U, [QueryLinkObject objectsWhere:@"link1 == query.link2"].count);
+    XCTAssertEqual(2U, [QueryLinkObject objectsWhere:@"link1 != query.link2"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"query.float1 == query.float1"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"query.float1 == query.float2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"query.float1 != query.float2"].count);
-    XCTAssertEqual(2U, [QueryObject objectsWhere:@"query.float1 > query.float2"].count);
-    XCTAssertEqual(4U, [QueryObject objectsWhere:@"query.float1 < query.float2"].count);
-    XCTAssertEqual(3U, [QueryObject objectsWhere:@"query.float1 >= query.float2"].count);
-    XCTAssertEqual(5U, [QueryObject objectsWhere:@"query.float1 <= query.float2"].count);
+    // link <-> link
+    XCTAssertEqual(3U, [QueryLinkObject objectsWhere:@"query.link1 == query.link1"].count);
+    XCTAssertEqual(0U, [QueryLinkObject objectsWhere:@"query.link1 != query.link1"].count);
 
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"query.double1 == query.double1"].count);
-    XCTAssertEqual(0U, [QueryObject objectsWhere:@"query.double1 == query.double2"].count);
-    XCTAssertEqual(7U, [QueryObject objectsWhere:@"query.double1 != query.double2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"query.double1 > query.double2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"query.double1 < query.double2"].count);
-    XCTAssertEqual(1U, [QueryObject objectsWhere:@"query.double1 >= query.double2"].count);
-    XCTAssertEqual(6U, [QueryObject objectsWhere:@"query.double1 <= query.double2"].count);
-
-#define AssertThrowsWithReason(expr, desc) \
-    @try { \
-        (void)expr; \
-        XCTFail(@"Expected to throw exception with message %@", desc); \
-    } \
-    @catch (NSException *exception) { \
-        XCTAssertEqual(exception.reason, desc); \
-    }
-
-    AssertThrowsWithReason([QueryObject objectsWhere:@"int2 != recordTag"].count,
-                           @"Property type mismatch between int and string");
-    AssertThrowsWithReason([QueryObject objectsWhere:@"float1 > recordTag"].count,
-                           @"Property type mismatch between float and string");
-    AssertThrowsWithReason([QueryObject objectsWhere:@"double1 < recordTag"].count,
-                           @"Property type mismatch between double and string");
+    XCTAssertEqual(1U, [QueryLinkObject objectsWhere:@"query.link1 == query.link2"].count);
+    XCTAssertEqual(2U, [QueryLinkObject objectsWhere:@"query.link1 != query.link2"].count);
 }
+
+#if 0
 
 - (void)testValidOperatorsInNumericComparison:(NSString *) comparisonType
                               withProposition:(BOOL(^)(NSPredicateOperatorType)) proposition
