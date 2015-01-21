@@ -458,35 +458,43 @@ Query get_columns(Func&& f, tightdb::Table *table, std::vector<NSUInteger> const
     };
 
     switch (prop.type) {
-        case type_Bool:
-            return bind_type(Bool());
-        case type_Int:
-            return bind_type(Int());
-        case type_Float:
-            return bind_type(Float());
-        case type_Double:
-            return bind_type(Double());
-        case type_DateTime:
-            return bind_type(int64_t());
-        case type_Link:
-            return bind_type(Link());
+        case type_Int: return bind_type(Int());
+        case type_Bool: return bind_type(Bool());
+        case type_Float: return bind_type(Float());
+        case type_Double: return bind_type(Double());
+        case type_String: return bind_type(String());
+        case type_DateTime: return bind_type(int64_t());
+        case type_Link: return bind_type(Link());
+        case type_LinkList: return bind_type(LinkList());
         default:
-            @throw @"";
-//            @throw RLMPredicateException(RLMUnsupportedTypesFoundInPropertyComparisonException,
-//                                         RLMUnsupportedTypesFoundInPropertyComparisonReason,
-//                                         RLMTypeToString(leftType),
-//                                         RLMTypeToString(rightType));
+            @throw RLMPredicateException(@"Unsupported property type",
+                                         @"Cannot compare properties of type %@",
+                                         RLMTypeToString(prop.type));
     }
 }
 
-template<typename Arg1, typename Arg2, typename Func>
-auto call_if_valid(Arg1&& a1, Arg2&& a2, Func&& f) -> decltype(f(a1, a2), Query()) {
+template<typename Arg1, typename Arg2, typename Func, decltype(Arg1() == Arg2()) = false>
+auto call_if_equatable(RLMPropertyType, RLMPropertyType, Arg1&& a1, Arg2&& a2, Func&& f) {
     return f(a1, a2);
 }
 
 template<typename... Args>
-Query call_if_valid(Args&&...) {
-    throw "bad";
+Query call_if_equatable(RLMPropertyType left, RLMPropertyType right, Args...) {
+    @throw RLMPredicateException(@"Unsupported property comparison",
+                                 @"Cannot compare properties of types %@ and %@",
+                                 RLMTypeToString(left), RLMTypeToString(right));
+}
+
+template<typename Arg1, typename Arg2, typename Func, decltype(Arg1() < Arg2()) = false>
+auto call_if_comparable(RLMPropertyType, RLMPropertyType, Arg1&& a1, Arg2&& a2, Func&& f) {
+    return f(a1, a2);
+}
+
+template<typename... Args>
+Query call_if_comparable(RLMPropertyType left, RLMPropertyType right, Args...) {
+    @throw RLMPredicateException(@"Unsupported property comparison",
+                                 @"Cannot compare properties of types %@ and %@",
+                                 RLMTypeToString(left), RLMTypeToString(right));
 }
 
 void update_query_with_column_expression(RLMSchema *schema,
@@ -503,17 +511,17 @@ void update_query_with_column_expression(RLMSchema *schema,
     auto comp = [&](auto left, auto right) {
         switch (pred.predicateOperatorType) {
             case NSEqualToPredicateOperatorType:
-                return call_if_valid(left, right, std::equal_to<>());
-//            case NSNotEqualToPredicateOperatorType:
-//                return left != right;
-//            case NSLessThanPredicateOperatorType:
-//                return left < right;
-//            case NSGreaterThanPredicateOperatorType:
-//                return left > right;
-//            case NSLessThanOrEqualToPredicateOperatorType:
-//                return left <= right;
-//            case NSGreaterThanOrEqualToPredicateOperatorType:
-//                return left >= right;
+                return call_if_equatable(leftProp.type, rightProp.type, left, right, std::equal_to<>());
+            case NSNotEqualToPredicateOperatorType:
+                return call_if_equatable(leftProp.type, rightProp.type, left, right, std::not_equal_to<>());
+            case NSLessThanPredicateOperatorType:
+                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::less<>());
+            case NSGreaterThanPredicateOperatorType:
+                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::greater<>());
+            case NSLessThanOrEqualToPredicateOperatorType:
+                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::less_equal<>());
+            case NSGreaterThanOrEqualToPredicateOperatorType:
+                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::greater_equal<>());
             default:
                 @throw RLMPredicateException(@"Unsupported operator",
                                              @"Only ==, !=, <, <=, >, and >= are supported comparison operators");
