@@ -438,6 +438,14 @@ void update_query_with_value_expression(RLMSchema *schema,
                             pred.options, indexes, index, value);
 }
 
+template<typename T>
+auto get_column(tightdb::Table *table, std::vector<NSUInteger> const& indices, NSUInteger col) {
+    for (NSUInteger col : indices) {
+        table->link(col); // mutates m_link_chain on table
+    }
+    return table->column<T>(col);
+}
+
 // base case for the variadic recursion
 template<typename Func>
 Query get_columns(Func&& f, tightdb::Table *) {
@@ -447,54 +455,22 @@ Query get_columns(Func&& f, tightdb::Table *) {
 template<typename Func, typename... Args>
 Query get_columns(Func&& f, tightdb::Table *table, std::vector<NSUInteger> const& indices, RLMProperty *prop, Args... rest) {
     auto bind_type = [&](auto argType) {
-        auto column = [&] {
-            for (NSUInteger col : indices) {
-                table->link(col); // mutates m_link_chain on table
-            }
-            return table->column<decltype(argType)>(prop.column);
-        };
-
-        return get_columns([&](auto... args) { return f(column(), args...); }, table, rest...);
+        return get_columns([&](auto... args) {
+            return f(get_column<decltype(argType)>(table, indices, prop.column), args...);
+        }, table, rest...);
     };
 
     switch (prop.type) {
-        case type_Int: return bind_type(Int());
-        case type_Bool: return bind_type(Bool());
-        case type_Float: return bind_type(Float());
-        case type_Double: return bind_type(Double());
-        case type_String: return bind_type(String());
+        case type_Int:      return bind_type(Int());
+        case type_Bool:     return bind_type(Bool());
+        case type_Float:    return bind_type(Float());
+        case type_Double:   return bind_type(Double());
         case type_DateTime: return bind_type(int64_t());
-        case type_Link: return bind_type(Link());
-        case type_LinkList: return bind_type(LinkList());
         default:
             @throw RLMPredicateException(@"Unsupported property type",
                                          @"Cannot compare properties of type %@",
                                          RLMTypeToString(prop.type));
     }
-}
-
-template<typename Arg1, typename Arg2, typename Func, decltype(Arg1() == Arg2()) = false>
-auto call_if_equatable(RLMPropertyType, RLMPropertyType, Arg1&& a1, Arg2&& a2, Func&& f) {
-    return f(a1, a2);
-}
-
-template<typename... Args>
-Query call_if_equatable(RLMPropertyType left, RLMPropertyType right, Args...) {
-    @throw RLMPredicateException(@"Unsupported property comparison",
-                                 @"Cannot compare properties of types %@ and %@",
-                                 RLMTypeToString(left), RLMTypeToString(right));
-}
-
-template<typename Arg1, typename Arg2, typename Func, decltype(Arg1() < Arg2()) = false>
-auto call_if_comparable(RLMPropertyType, RLMPropertyType, Arg1&& a1, Arg2&& a2, Func&& f) {
-    return f(a1, a2);
-}
-
-template<typename... Args>
-Query call_if_comparable(RLMPropertyType left, RLMPropertyType right, Args...) {
-    @throw RLMPredicateException(@"Unsupported property comparison",
-                                 @"Cannot compare properties of types %@ and %@",
-                                 RLMTypeToString(left), RLMTypeToString(right));
 }
 
 void update_query_with_column_expression(RLMSchema *schema,
@@ -508,57 +484,84 @@ void update_query_with_column_expression(RLMSchema *schema,
     std::vector<NSUInteger> rightIndexes;
     RLMProperty *rightProp = get_property_from_key_path(schema, objectSchema, pred.rightExpression.keyPath, rightIndexes, isAny);
 
+    Table *table = query.get_table().get();
     switch (leftProp.type) {
-        case RLMPropertyTypeString:
-            RLMPrecondition(rightProp.type == RLMPropertyTypeString, @"Unsupported property comparison",
-                            @"Cannot compare string properties to %@ properties", RLMTypeToString(rightProp.type));
-            switch (pred.predicateOperatorType) {
-                case NSEqualToPredicateOperatorType:
-                    break;
-                    // ...
-            }
-        case RLMPropertyTypeObject:
-            RLMPrecondition(rightProp.type == RLMPropertyTypeObject, @"Unsupported property comparison",
-                            @"Cannot compare relationship properties to %@ properties", RLMTypeToString(rightProp.type));
-            break;
         case RLMPropertyTypeAny:
             @throw RLMPredicateException(@"Unsupported property type",
                                          @"Querying on mixed properties is not supported");
         case RLMPropertyTypeArray:
-            @throw @"maybe work";
+            @throw @"maybe works?";
         case RLMPropertyTypeData:
             @throw RLMPredicateException(@"Unsupported property type",
                                          @"Comparing data columns to other columns is not supported");
+        case RLMPropertyTypeString: {
+            RLMPrecondition(rightProp.type == RLMPropertyTypeString, @"Unsupported property comparison",
+                            @"Cannot compare string properties to %@ properties", RLMTypeToString(rightProp.type));
+            auto left = get_column<String>(table, leftIndexes, leftProp.column);
+            auto right = get_column<String>(table, rightIndexes, rightProp.column);
+            switch (pred.predicateOperatorType) {
+                case NSEqualToPredicateOperatorType:
+                    query.and_query(left == right);
+                    break;
+                case NSNotEqualToPredicateOperatorType:
+                    query.and_query(left != right);
+                    break;
+                default:
+                    @throw RLMPredicateException(@"Unsupported operator",
+                                                 @"Only ==, !=, BEGINSWITH, ENDSWITH and CONTAINS are supported for string properties");
+            }
+            break;
+        }
+
+        case RLMPropertyTypeObject: {
+            RLMPrecondition(rightProp.type == RLMPropertyTypeObject, @"Unsupported property comparison",
+                            @"Cannot compare relationship properties to %@ properties", RLMTypeToString(rightProp.type));
+            auto left = get_column<Link>(table, leftIndexes, leftProp.column);
+            auto right = get_column<Link>(table, rightIndexes, rightProp.column);
+            switch (pred.predicateOperatorType) {
+                case NSEqualToPredicateOperatorType:
+//                    query.and_query(left == right);
+                    break;
+                case NSNotEqualToPredicateOperatorType:
+//                    query.and_query(left != right);
+                    break;
+                default:
+                    @throw RLMPredicateException(@"Unsupported operator",
+                                                 @"Only == and != are supported for relationship properties");
+            }
+            break;
+        }
+
         case RLMPropertyTypeBool:
         case RLMPropertyTypeDate:
         case RLMPropertyTypeInt:
         case RLMPropertyTypeFloat:
-        case RLMPropertyTypeDouble:
-            // stupid shit
+        case RLMPropertyTypeDouble: {
+            auto comp = [&](auto left, auto right) {
+                switch (pred.predicateOperatorType) {
+                    case NSEqualToPredicateOperatorType:
+                        return left == right;
+                    case NSNotEqualToPredicateOperatorType:
+                        return left != right;
+                    case NSLessThanPredicateOperatorType:
+                        return left < right;
+                    case NSGreaterThanPredicateOperatorType:
+                        return left > right;
+                    case NSLessThanOrEqualToPredicateOperatorType:
+                        return left <= right;
+                    case NSGreaterThanOrEqualToPredicateOperatorType:
+                        return left >= right;
+                    default:
+                        @throw RLMPredicateException(@"Unsupported operator",
+                                                     @"Only ==, !=, <, <=, > and >= are supported for numeric properties");
+                }
+            };
+
+            query.and_query(get_columns(comp, table, leftIndexes, leftProp, rightIndexes, rightProp));
             break;
+        }
     }
 
-    auto comp = [&](auto left, auto right) {
-        switch (pred.predicateOperatorType) {
-            case NSEqualToPredicateOperatorType:
-                return call_if_equatable(leftProp.type, rightProp.type, left, right, std::equal_to<>());
-            case NSNotEqualToPredicateOperatorType:
-                return call_if_equatable(leftProp.type, rightProp.type, left, right, std::not_equal_to<>());
-            case NSLessThanPredicateOperatorType:
-                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::less<>());
-            case NSGreaterThanPredicateOperatorType:
-                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::greater<>());
-            case NSLessThanOrEqualToPredicateOperatorType:
-                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::less_equal<>());
-            case NSGreaterThanOrEqualToPredicateOperatorType:
-                return call_if_comparable(leftProp.type, rightProp.type, left, right, std::greater_equal<>());
-            default:
-                @throw RLMPredicateException(@"Unsupported operator",
-                                             @"Only ==, !=, <, <=, >, and >= are supported comparison operators");
-        }
-    };
-
-    query.and_query(get_columns(comp, query.get_table().get(), leftIndexes, leftProp, rightIndexes, rightProp));
 }
 
 void update_query_with_predicate(NSPredicate *predicate, RLMSchema *schema,
