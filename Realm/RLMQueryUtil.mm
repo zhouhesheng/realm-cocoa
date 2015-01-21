@@ -508,6 +508,36 @@ void update_query_with_column_expression(RLMSchema *schema,
     std::vector<NSUInteger> rightIndexes;
     RLMProperty *rightProp = get_property_from_key_path(schema, objectSchema, pred.rightExpression.keyPath, rightIndexes, isAny);
 
+    switch (leftProp.type) {
+        case RLMPropertyTypeString:
+            RLMPrecondition(rightProp.type == RLMPropertyTypeString, @"Unsupported property comparison",
+                            @"Cannot compare string properties to %@ properties", RLMTypeToString(rightProp.type));
+            switch (pred.predicateOperatorType) {
+                case NSEqualToPredicateOperatorType:
+                    break;
+                    // ...
+            }
+        case RLMPropertyTypeObject:
+            RLMPrecondition(rightProp.type == RLMPropertyTypeObject, @"Unsupported property comparison",
+                            @"Cannot compare relationship properties to %@ properties", RLMTypeToString(rightProp.type));
+            break;
+        case RLMPropertyTypeAny:
+            @throw RLMPredicateException(@"Unsupported property type",
+                                         @"Querying on mixed properties is not supported");
+        case RLMPropertyTypeArray:
+            @throw @"maybe work";
+        case RLMPropertyTypeData:
+            @throw RLMPredicateException(@"Unsupported property type",
+                                         @"Comparing data columns to other columns is not supported");
+        case RLMPropertyTypeBool:
+        case RLMPropertyTypeDate:
+        case RLMPropertyTypeInt:
+        case RLMPropertyTypeFloat:
+        case RLMPropertyTypeDouble:
+            // stupid shit
+            break;
+    }
+
     auto comp = [&](auto left, auto right) {
         switch (pred.predicateOperatorType) {
             case NSEqualToPredicateOperatorType:
