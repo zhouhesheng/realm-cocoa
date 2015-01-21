@@ -26,6 +26,57 @@ extern "C" {
 #import "RLMRealm_Dynamic.h"
 #import "RLMRealm_Private.hpp"
 
+@interface IntPKObject : RLMObject
+@property(nonatomic) int pk;
+@end
+
+@implementation IntPKObject
++ (NSString *)primaryKey { return @"pk"; }
+@end
+
+@interface PKTest : RLMTestCase
+@end
+
+@implementation PKTest
+//* thread #4: tid = 0x10532bd, 0x03a236cc iOS Tests`long long (anonymous namespace)::get_direct<16>(data=0x054f80f0, ndx=0) + 28 at array.cpp:2612, queue = 'queue', stop reason = EXC_BAD_ACCESS (code=1, address=0x54f80f0)
+//* frame #0: 0x03a236cc iOS Tests`long long (anonymous namespace)::get_direct<16>(data=0x054f80f0, ndx=0) + 28 at array.cpp:2612
+//frame #1: 0x03a22101 iOS Tests`(anonymous namespace)::get_direct(data=0x054f80f0, width=16, ndx=0) + 65 at array.cpp:2628
+//frame #2: 0x03a391c2 iOS Tests`unsigned long tightdb::Array::index_string<(this=0x7b9770b0, value=<unavailable>, result=0xb0114840, result_ref=0xb0114854, column=0x7b991130, get_func=0x03b86570)0, tightdb::StringData>(tightdb::StringData, tightdb::Column&, unsigned long&, void*, tightdb::StringData (*)(void*, unsigned long, char*)) const + 210 at array.cpp:2999
+//frame #3: 0x03a1f4d1 iOS Tests`tightdb::Array::IndexStringFindFirst(this=0x7b9770b0, value=(m_data = "", m_size = 8), column=0x7b991130, get_func=0x03b86570)(void*, unsigned long, char*)) const + 113 at array.cpp:3135
+//frame #4: 0x03b8bece iOS Tests`unsigned long tightdb::StringIndex::find_first<long long>(this=0x7b99a920, value=0) const + 94 at index_string.hpp:68
+//frame #5: 0x03b868c3 iOS Tests`tightdb::Column::find_first(this=0x7b991130, value=0, begin=0, end=4294967295) const + 339 at column.cpp:790
+//frame #6: 0x03cbd477 iOS Tests`unsigned long tightdb::Table::find_first<long long>(this=0x7cc5d600, col_ndx=0, value=0) const + 327 at table.cpp:3096
+//frame #7: 0x03cab3d8 iOS Tests`tightdb::Table::find_first_int(this=0x7cc5d600, col_ndx=0, value=0) const + 56 at table.cpp:3108
+//frame #8: 0x03991f82 iOS Tests`unsigned int RLMCreateOrGetRowForObject<RLMCreateObjectInRealmWithValue::$_1>(schema=0x7b976e50, primaryValueGetter=<unavailable>, options=6, created=0xb0114d3f) + 562 at RLMObjectStore.mm:315
+//frame #9: 0x03991173 iOS Tests`RLMCreateObjectInRealmWithValue(realm=0x7b9794d0, className=0x7ae621e0, value=0x7b94da80, options=6) + 691 at RLMObjectStore.mm:423
+//frame #10: 0x03984ee8 iOS Tests`+[RLMObject createOrUpdateInRealm:withObject:](self=0x03e0a294, _cmd=0x7ae59630, realm=0x7b9794d0, value=0x7b94da80) + 168 at RLMObject.mm:67
+//frame #11: 0x03793d27 iOS Tests`__19-[PKTest testStuff]_block_invoke(.block_descriptor=<unavailable>) + 295 at MigrationTests.mm:50
+//frame #12: 0x01a47e5a libdispatch.dylib`_dispatch_call_block_and_release + 15
+//frame #13: 0x01a64f0f libdispatch.dylib`_dispatch_client_callout + 14
+//frame #14: 0x01a4d0e8 libdispatch.dylib`_dispatch_queue_drain + 411
+//frame #15: 0x01a4cded libdispatch.dylib`_dispatch_queue_invoke + 197
+//frame #16: 0x01a4f2c2 libdispatch.dylib`_dispatch_root_queue_drain + 428
+//frame #17: 0x01a5045a libdispatch.dylib`_dispatch_worker_thread2 + 39
+//frame #18: 0x01dcbdab libsystem_pthread.dylib`_pthread_wqthread + 336
+//frame #19: 0x01dcfcce libsystem_pthread.dylib`start_wqthread + 30
+
+- (void)testStuff {
+    dispatch_queue_t queue = dispatch_queue_create("queue", DISPATCH_QUEUE_SERIAL);
+    for (int i = 0; i < 3; ++i) {
+        dispatch_async(queue, ^{
+            for (int j = 0; j < 50; ++j) {
+                RLMRealm *realm = RLMRealm.defaultRealm;
+                [realm beginWriteTransaction];
+                [IntPKObject createOrUpdateInRealm:realm withObject:@[@0]];
+                [realm commitWriteTransaction];
+            }
+        });
+        // wait for the async block
+        dispatch_sync(queue, ^{});
+    }
+}
+@end
+
 @interface MigrationObject : RLMObject
 @property int intCol;
 @property NSString *stringCol;
