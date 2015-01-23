@@ -216,7 +216,18 @@ static bool RLMRealmCreateTables(RLMRealm *realm, RLMSchema *targetSchema, bool 
         }
     }
 
-    // FIXME - remove deleted tables
+    if (updateExisting) {
+        NSMutableArray *tablesToDelete = [NSMutableArray array];
+        for (size_t i = 0; i < realm.group->size(); i++) {
+            NSString *tableName = RLMStringDataToNSString(realm.group->get_table_name(i));
+            if ([tableName hasPrefix:c_objectTableNamePrefix] && !realm.schema[RLMClassForTableName(tableName)]) {
+                [tablesToDelete addObject:tableName];
+            }
+        }
+        for (NSString *tableName in tablesToDelete) {
+            realm.group->remove_table(RLMStringDataWithNSString(tableName));
+        }
+    }
 
     for (RLMObjectSchema *objectSchema in realm.schema.objectSchema) {
         objectSchema.realm = realm;
