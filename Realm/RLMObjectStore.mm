@@ -217,6 +217,7 @@ static bool RLMRealmCreateTables(RLMRealm *realm, RLMSchema *targetSchema, bool 
     }
 
     if (updateExisting) {
+        // Remove tables that are no longer relevant
         NSMutableArray *tablesToDelete = [NSMutableArray array];
         for (size_t i = 0; i < realm.group->size(); i++) {
             NSString *tableName = RLMStringDataToNSString(realm.group->get_table_name(i));
@@ -224,6 +225,7 @@ static bool RLMRealmCreateTables(RLMRealm *realm, RLMSchema *targetSchema, bool 
                 [tablesToDelete addObject:tableName];
             }
         }
+        // Necessary to loop over the table names since indices can change whenever a single table is removed
         for (NSString *tableName in tablesToDelete) {
             realm.group->remove_table(RLMStringDataWithNSString(tableName));
         }
