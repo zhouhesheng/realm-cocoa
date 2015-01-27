@@ -25,6 +25,7 @@ extern "C" {
 #import "RLMProperty_Private.h"
 #import "RLMRealm_Dynamic.h"
 #import "RLMRealm_Private.hpp"
+#import "RLMUtil.hpp"
 
 @interface MigrationObject : RLMObject
 @property int intCol;
@@ -127,6 +128,28 @@ extern "C" {
 
     XCTAssertEqual(2U, [RLMRealm schemaVersionAtPath:anotherRealm.path encryptionKey:nil error:nil]);
     XCTAssertTrue(migrationComplete);
+}
+
+- (void)testRemovingSubclass {
+    RLMObjectSchema *objectSchema = [[RLMObjectSchema alloc] initWithClassName:@"DeletedClass" objectClass:RLMObject.class properties:@[]];
+    RLMRealm *realm = [self realmWithSingleObject:objectSchema];
+
+    [realm transactionWithBlock:^{
+        [realm createObject:@"DeletedClass" withObject:@[]];
+    }];
+
+    // apply migration
+    [RLMRealm setSchemaVersion:1 forRealmAtPath:RLMTestRealmPath() withMigrationBlock:^(__unused RLMMigration *migration, NSUInteger oldSchemaVersion) {
+        XCTAssertEqual(oldSchemaVersion, 0U, @"Initial schema version should be 0");
+    }];
+    [RLMRealm migrateRealmAtPath:RLMTestRealmPath()];
+
+    // verify migration
+    realm = [self realmWithTestPath];
+    XCTAssertEqual(tightdb::not_found, realm.group->find_table(RLMStringDataWithNSString(RLMTableNameForClass(@"DeletedClass"))), @"The deleted class should not have a table.");
+
+    [RLMRealm setSchemaVersion:0 forRealmAtPath:RLMTestRealmPath() withMigrationBlock:nil];
+    XCTAssertThrows([RLMRealm migrateRealmAtPath:RLMTestRealmPath()]);
 }
 
 - (void)testAddingProperty {
