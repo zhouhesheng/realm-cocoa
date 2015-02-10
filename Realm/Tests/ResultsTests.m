@@ -234,6 +234,32 @@
     XCTAssertThrows([allArray maxOfProperty:@"boolCol"]);
 }
 
+- (void)testDoubleAggregatesOnQueriedColumn {
+    RLMRealm *realm = [RLMRealm defaultRealm];
+    [realm transactionWithBlock:^{
+        for (NSUInteger i = 0; i < 10000; ++i) {
+            double f = (double)arc4random_uniform(250) / (arc4random_uniform(250) + 1);
+            [DoubleObject createInRealm:realm withObject:@[@(f)]];
+        }
+    }];
+
+    RLMResults *results = [[DoubleObject objectsWhere:@"doubleCol != 0"] sortedResultsUsingProperty:@"doubleCol" ascending:YES];
+
+    double minOfProperty = [[results minOfProperty:@"doubleCol"] doubleValue];
+    double maxOfProperty = [[results maxOfProperty:@"doubleCol"] doubleValue];
+    double sumOfProperty = [[results sumOfProperty:@"doubleCol"] doubleValue];
+
+    double min = [results.firstObject doubleCol];
+    double max = [results.lastObject doubleCol];
+    double sum = 0;
+    for (DoubleObject *num in results)
+        sum += num.doubleCol;
+
+    XCTAssertEqualWithAccuracy(minOfProperty, min, 0.1f);
+    XCTAssertEqualWithAccuracy(maxOfProperty, max, 0.1f);
+    XCTAssertEqualWithAccuracy(sumOfProperty, sum, 0.1f);
+}
+
 - (void)testArrayDescription
 {
     RLMRealm *realm = [RLMRealm defaultRealm];
