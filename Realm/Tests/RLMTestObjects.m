@@ -117,6 +117,9 @@
 @implementation ArrayPropertyObject
 @end
 
+@implementation PrimaryStringArrayPropertyObject
+@end
+
 #pragma mark DynamicObject
 
 @implementation DynamicObject

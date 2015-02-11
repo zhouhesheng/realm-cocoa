@@ -1579,6 +1579,24 @@
     XCTAssertEqual(1U, [[co.employees objectsWhere:@"hired = YES"] objectsWhere:@"name = 'Joe'"].count);
 }
 
+- (void)testLinkViewQueryOnIndexedColumnAfterRemovingAndAddingFirstObject {
+    RLMRealm *realm = [RLMRealm defaultRealm];
+
+    [realm beginWriteTransaction];
+    RLMArray *array = [PrimaryStringArrayPropertyObject createInRealm:realm withObject:@[@[]]].array;
+    PrimaryStringObject *string1 = [PrimaryStringObject createInRealm:realm withObject:@[@"John", @0]];
+    PrimaryStringObject *string2 = [PrimaryStringObject createInRealm:realm withObject:@[@"Joe", @0]];
+
+    [array addObject:string1];
+    [array addObject:string2];
+    [array removeObjectAtIndex:0]; // Remove string1
+    [array addObject:string1];
+    [realm commitWriteTransaction];
+
+    XCTAssertEqual(1U, ([array objectsWhere:@"stringCol = %@", @"John"].count));
+    XCTAssertEqual(1U, ([array objectsWhere:@"stringCol = %@", @"Joe"].count));
+}
+
 - (void)testLinkViewQueryLifetime {
     RLMRealm *realm = [RLMRealm defaultRealm];
 

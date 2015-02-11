@@ -219,6 +219,12 @@ RLM_ARRAY_TYPE(CircleObject);
 
 @end
 
+RLM_ARRAY_TYPE(PrimaryStringObject);
+
+@interface PrimaryStringArrayPropertyObject : RLMObject
+@property RLMArray<PrimaryStringObject> *array;
+@end
+
 #pragma mark DynamicObject
 
 @interface DynamicObject : RLMObject
