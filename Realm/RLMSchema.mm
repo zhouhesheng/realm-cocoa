@@ -19,7 +19,7 @@
 #import "RLMSchema_Private.h"
 
 #import "RLMAccessor.h"
-#import "RLMObject.h"
+#import "RLMObject_Private.h"
 #import "RLMObjectSchema_Private.hpp"
 #import "RLMRealm_Private.hpp"
 #import "RLMSwiftSupport.h"
@@ -124,7 +124,7 @@ static NSMutableDictionary *s_localNameToClass;
 
     // process all RLMObject subclasses
     for (Class cls in s_localNameToClass.allValues) {
-        RLMObjectSchema *schema = [RLMObjectSchema schemaForObjectClass:cls];
+        RLMObjectSchema *schema = [cls createSharedSchema];
         [schemaArray addObject:schema];
 
         // override sharedSchema classs methods for performance

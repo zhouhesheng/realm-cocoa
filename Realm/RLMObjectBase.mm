@@ -133,6 +133,14 @@
     return RLMSchema.sharedSchema[self.className];
 }
 
++ (RLMObjectSchema *)createSharedSchema {
+    return [RLMObjectSchema schemaForObjectClass:self];
+}
+
++ (NSArray *)objectSchemaProperties:(BOOL)isSwift {
+    return [RLMObjectSchema propertiesForClass:self isSwift:isSwift];
+}
+
 - (NSArray *)linkingObjectsOfClass:(NSString *)className forProperty:(NSString *)property {
     if (!_realm) {
         @throw RLMException(@"Linking object only available for objects in a Realm.");

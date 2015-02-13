@@ -20,7 +20,7 @@
 
 #import "RLMArray.h"
 #import "RLMListBase.h"
-#import "RLMObject.h"
+#import "RLMObject_Private.h"
 #import "RLMProperty_Private.h"
 #import "RLMRealm_Dynamic.h"
 #import "RLMRealm_Private.hpp"
@@ -106,7 +106,7 @@
     Class superClass = class_getSuperclass(cls);
     NSArray *props = @[];
     while (superClass != RLMObjectBase.class) {
-        props = [[RLMObjectSchema propertiesForClass:cls isSwift:isSwift] arrayByAddingObjectsFromArray:props];
+        props = [[cls objectSchemaProperties:isSwift] arrayByAddingObjectsFromArray:props];
         cls = superClass;
         superClass = class_getSuperclass(superClass);
     }

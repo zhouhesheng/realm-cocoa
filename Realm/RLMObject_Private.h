@@ -40,5 +40,9 @@
 // shared schema for this class
 + (RLMObjectSchema *)sharedSchema;
 
++ (RLMObjectSchema *)createSharedSchema;
+
++ (NSArray *)objectSchemaProperties:(BOOL)isSwift;
+
 @end
 

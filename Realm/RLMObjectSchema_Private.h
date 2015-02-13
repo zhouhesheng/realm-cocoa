@@ -36,6 +36,9 @@
 
 // The Realm retains its object schemas, so they need to not retain the Realm
 @property (nonatomic, unsafe_unretained) RLMRealm *realm;
+
++ (NSArray *)propertiesForClass:(Class)objectClass isSwift:(bool)isSwiftClass;
+
 // returns a cached or new schema for a given object class
 +(instancetype)schemaForObjectClass:(Class)objectClass;
 
