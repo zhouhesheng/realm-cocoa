@@ -125,13 +125,15 @@ static NSMutableDictionary *s_localNameToClass;
     // process all RLMObject subclasses
     for (Class cls in s_localNameToClass.allValues) {
         RLMObjectSchema *schema = [cls createSharedSchema];
-        [schemaArray addObject:schema];
+        if (schema) {
+            [schemaArray addObject:schema];
+
+            // set standalone class on shared shema for standalone object creation
+            schema.standaloneClass = RLMStandaloneAccessorClassForObjectClass(schema.objectClass, schema);
+        }
 
         // override sharedSchema classs methods for performance
         RLMReplaceSharedSchemaMethod(cls, schema);
-
-        // set standalone class on shared shema for standalone object creation
-        schema.standaloneClass = RLMStandaloneAccessorClassForObjectClass(schema.objectClass, schema);
     }
     free(classes);
 
